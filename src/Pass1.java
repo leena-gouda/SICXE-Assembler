@@ -6,7 +6,7 @@ public class Pass1 {
     static int startingAddress;
     static Instruction instruction = new Instruction();
     public static void locCounter (File intFile){
-        File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
+        File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
         Scanner intFileReader = null;
         PrintWriter pass1Write = null;
         try {
@@ -19,19 +19,26 @@ public class Pass1 {
                 startingAddress = Integer.parseInt(parts[2], 16);
                 locCount = startingAddress;
                 pass1Write.println(firstLine);
-                pass1Write.write(String.format("%04X\t", locCount));
-                //pass1Write.println();
             }
 
             while(intFileReader.hasNextLine()){
-
-
+                //read current line
                 String line = intFileReader.nextLine();
-                pass1Write.write(line);
 
+                //if base inst write as is and continue
+                if (line.contains("BASE")){
+                    pass1Write.println(line);
+                    continue;
+                }
+
+                //write locCount (of previous inst) and rewrite current instruction
+                pass1Write.write(String.format("%04X\t", locCount));
+                pass1Write.write(line);
+                pass1Write.println();
                 parts = line.split("\\s+");
-                String label = null;
-                // place instruction in inst obj based on length (checkin if theres a label)
+
+
+                // place instruction in inst obj based on length (checkin if there's a label)
                 if(parts.length == 2){
                     instruction.Mnemonic =  parts[0];
                     instruction.operand = parts[1];
@@ -54,19 +61,15 @@ public class Pass1 {
                 instruction.opcode = Instruction.findOpcode(instruction.Mnemonic);
 
 
-
                 // inc locount based on format
-                System.out.println(instruction.format);
                 if (instruction.Mnemonic.equals("END")){
                     continue;
                 }
                 if (instruction.format == 1){
                     locCount += 1;
-                    System.out.println("in1");
                 }
                 else if (instruction.format == 2){
                     locCount += 2;
-                    System.out.println("in2");
                 }
                 else if (instruction.format == 3 && !instruction.operand.startsWith("+")){
                     locCount += 3;
@@ -75,9 +78,10 @@ public class Pass1 {
                     locCount += 4;
                 }
             }
-            //write loccount + inst in file
+
+            //move to next line
             pass1Write.println();
-            pass1Write.write(String.format("%04X\t", locCount));
+
         }
         catch (Exception e){
             System.out.println("Error: " + e);
@@ -91,7 +95,25 @@ public class Pass1 {
                 pass1Write.close();
             }
         }
+        //symTable(intFile);
     }
+
+   /* public static void symTable(File intFile){
+        File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
+        Scanner intFileReader = null;
+        PrintWriter symFileWrite = null;
+
+        try {
+            intFileReader = new Scanner(intFile);
+            symFileWrite = new PrintWriter(symFile);
+
+
+
+        }
+        catch(Exception e){
+            System.out.println("Error: " + e);
+        }
+    }*/
 
 
 }
