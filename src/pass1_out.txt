@@ -2,7 +2,7 @@ SUM       START   1000
 1000	LDX     #0          
 1003	LDA     #0          
 1006	+LDB    #TABLE2     
-BASE    TABLE2      
+		BASE    TABLE2      
 100A	LOOP      ADD     TABLE,X     
 100D	ADD     TABLE2,X    
 1010	TIX     COUNT       
@@ -14,4 +14,3 @@ BASE    TABLE2
 1025	TABLE2    RESW    2000        
 1029	TOTAL     RESW    1           
 102D	END     SUM         
-
