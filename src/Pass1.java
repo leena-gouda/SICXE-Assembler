@@ -5,6 +5,7 @@ public class Pass1 {
     static int locCount;
     static int startingAddress;
     static Instruction instruction = new Instruction();
+
     public static void locCounter (File intFile){
         //File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
         File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
@@ -28,7 +29,7 @@ public class Pass1 {
 
                 //if base inst write as is and continue
                 if (line.contains("BASE")){
-                    pass1Write.println(line);
+                    pass1Write.println("\t\t" + line);
                     continue;
                 }
 
@@ -103,8 +104,7 @@ public class Pass1 {
                 }
             }
 
-            //move to next line
-            pass1Write.println();
+
 
         }
         catch (Exception e){
@@ -118,26 +118,40 @@ public class Pass1 {
             if (pass1Write != null) {
                 pass1Write.close();
             }
+            symTable(out_pass1);
         }
-        //symTable(intFile);
     }
 
-   /* public static void symTable(File intFile){
+    public static void symTable(File out_pass1){
         File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
-        Scanner intFileReader = null;
+        Scanner pass1Reader = null;
         PrintWriter symFileWrite = null;
 
         try {
-            intFileReader = new Scanner(intFile);
+            pass1Reader = new Scanner(out_pass1);
             symFileWrite = new PrintWriter(symFile);
 
-
-
+            while (pass1Reader.hasNextLine()){
+                String line = pass1Reader.nextLine();
+                String[] parts = line.split("\\s+");
+                // counter - label - inst - operand
+                if (parts.length == 4){
+                    // counter & label
+                    symFileWrite.println(parts[0] + "\t" + parts[1]);
+                }
+            }
         }
         catch(Exception e){
             System.out.println("Error: " + e);
         }
-    }*/
-
+        finally {
+            if (pass1Reader != null) {
+                pass1Reader.close();
+            }
+            if (symFileWrite != null) {
+                symFileWrite.close();
+            }
+        }
+    }
 
 }

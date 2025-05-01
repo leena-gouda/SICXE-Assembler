@@ -9,9 +9,9 @@ BASE    TABLE2
 1013	JLT     LOOP        
 1016	+STA    TOTAL       
 101A	RSUB                
-101D	COUNT     WORD    1           
-1020	TABLE     RESB    2000        
-3020	TABLE2    RESW    2000        
-4790	TOTAL     BYTE    31          
-4791	END     SUM         
+101D	COUNT     RESW    1           
+1021	TABLE     RESW    2000        
+1025	TABLE2    RESW    2000        
+1029	TOTAL     RESW    1           
+102D	END     SUM         
 
