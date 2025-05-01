@@ -1,0 +1,17 @@
+SUM       START   1000        
+1000	
+1000	LDX     #0          
+1003	LDA     #0          
+1006	+LDB    #TABLE2     
+100A	BASE    TABLE2      
+100A	LOOP      ADD     TABLE,X     
+100D	ADD     TABLE2,X    
+1010	TIX     COUNT       
+1013	JLT     LOOP        
+1016	+STA    TOTAL       
+101A	RSUB                
+101D	COUNT     RESW    1           
+1021	TABLE     RESW    2000        
+1025	TABLE2    RESW    2000        
+1029	TOTAL     RESW    1           
+102D	END     SUM         
