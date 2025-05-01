@@ -1,4 +1,4 @@
-SUM       START   1000        
+SUM       START   0000        
 LDX     #0          
 LDA     #0          
 +LDB    #TABLE2     
@@ -9,8 +9,8 @@ TIX     COUNT
 JLT     LOOP        
 +STA    TOTAL       
 RSUB                
-COUNT     WORD    1           
-TABLE     RESB    2000        
+COUNT     RESW    1           
+TABLE     RESW    2000        
 TABLE2    RESW    2000        
-TOTAL     BYTE    31          
+TOTAL     RESW    1          
 END     SUM         

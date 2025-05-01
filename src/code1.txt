@@ -1,4 +1,4 @@
-1    SUM       START   1000        ; Program starts at address 1000H
+1    SUM       START   0000        ; Program starts at address 1000H
 2              LDX     #0          ; Initialize index register to 0
 3              LDA     #0          ; Initialize accumulator to 0
 4              +LDB    #TABLE2     ; Extended load base register with TABLE2 address
@@ -9,8 +9,8 @@
 9              JLT     LOOP        ; Jump back to LOOP if index < COUNT
 10             +STA    TOTAL       ; Extended store accumulator to TOTAL
 11             RSUB                ; Return from subroutine
-12   COUNT     WORD    1           ; Reserve 1 word for counter
-13   TABLE     RESB    2000        ; Reserve 2000 words for first table
+12   COUNT     RESW    1           ; Reserve 1 word for counter
+13   TABLE     RESW    2000        ; Reserve 2000 words for first table
 14   TABLE2    RESW    2000        ; Reserve 2000 words for second table
-15   TOTAL     BYTE    31          ; Reserve 1 word for total
+15   TOTAL     RESW    1          ; Reserve 1 word for total
 16             END     SUM         ; End of program

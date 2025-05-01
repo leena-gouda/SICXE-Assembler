@@ -123,7 +123,9 @@ public class Pass1 {
     }
 
     public static void symTable(File out_pass1){
-        File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
+       // File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
+        File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
+
         Scanner pass1Reader = null;
         PrintWriter symFileWrite = null;
 
