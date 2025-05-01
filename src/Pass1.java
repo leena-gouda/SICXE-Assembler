@@ -6,7 +6,8 @@ public class Pass1 {
     static int startingAddress;
     static Instruction instruction = new Instruction();
     public static void locCounter (File intFile){
-        File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        //File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         Scanner intFileReader = null;
         PrintWriter pass1Write = null;
         try {
@@ -73,6 +74,29 @@ public class Pass1 {
                 }
                 else if (instruction.format == 3 && !instruction.operand.startsWith("+")){
                     locCount += 3;
+                }
+                else if(line.contains("RESW")){
+                    // Parse the operand as decimal (since assembler directives use decimal numbers)
+                    int decimalValue = Integer.parseInt(instruction.operand);
+                    // Convert to bytes (RESW = 3 bytes per word)
+                    int bytesToAdvance = decimalValue * 3;
+                    // Advance the location counter (which is stored as hexadecimal internally)
+                    locCount += bytesToAdvance;
+                }
+                else if(line.contains("RESB")){
+                    locCount += Integer.parseInt(instruction.operand,16);
+                }
+                else if(line.contains("WORD")){
+                    if(instruction.operand.contains(",")){
+                        int count = parts.length;
+                        locCount += count * 3 - 1;
+                    }
+                    else{
+                        locCount += 3;
+                    }
+                }
+                else if(line.contains("BYTE")){
+                    locCount += 1;
                 }
                 else {
                     locCount += 4;

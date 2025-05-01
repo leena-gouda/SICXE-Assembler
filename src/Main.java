@@ -3,10 +3,12 @@ import java.io.*;
 import java.util.*;
 public class Main {
     public static void main(String[] args) {
-        File code1 = new File("C:C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\code1.txt");
-        File intFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\IntermediateFile.txt");
+        //File code1 = new File("C:C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\code1.txt");
+        //File intFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\IntermediateFile.txt");
+        File code1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\code1.txt");
+        File intFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\IntermediateFile.txt");
         addIns();
-        //generateIntFile(code1, intFile);
+        generateIntFile(code1, intFile);
         Pass1.locCounter(intFile);
     }
     public static void generateIntFile(File inFile, File outFile) {
