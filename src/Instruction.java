@@ -2,12 +2,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Instruction {
+
     String opcode;
     int format;
     String Mnemonic;
     String operand;
     String label;
+    String loc;
+
     static List<Instruction> instructions = new ArrayList<>();
+
     public Instruction(String Mnemonic, int format, String opcode) {
         this.opcode = opcode;
         this.format = format;
@@ -18,24 +22,33 @@ public class Instruction {
 
     }
 
+
     public static int findFormat (String Mnemonic) {
-        int f = 0;
+        if (Mnemonic.startsWith("+"))
+            return 4;
+        // remove @ to find inst in list
+        if (Mnemonic.startsWith("@")) {
+            Mnemonic = Mnemonic.substring(1);
+        }
         for (Instruction i : instructions) {
             if (i.Mnemonic.equals(Mnemonic)) {
-                f = i.format;
+                return i.format;
             }
         }
-        return f;
+        return 0;
     }
 
     public static String findOpcode (String Mnemonic) {
-        String op = "";
+        // remove to find opcode in list
+        if (Mnemonic.startsWith("+") || Mnemonic.startsWith("@")) {
+            Mnemonic = Mnemonic.substring(1);
+        }
         for (Instruction i : instructions) {
-            if (i.Mnemonic == Mnemonic) {
-                op = i.opcode;
+            if (i.Mnemonic.equals(Mnemonic)) {
+                return i.opcode;
             }
         }
-        return op;
+        return "";
     }
 
 }
