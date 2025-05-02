@@ -3,13 +3,27 @@ import java.io.*;
 import java.util.*;
 public class Main {
     public static void main(String[] args) {
-        //File code1 = new File("C:C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\code1.txt");
-        //File intFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\IntermediateFile.txt");
-        File code1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\code1.txt");
-        File intFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\IntermediateFile.txt");
+        File code1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\code1.txt");
+        File intFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\IntermediateFile.txt");
+        //File code1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\code1.txt");
+        //File intFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\IntermediateFile.txt");
+
         addIns();
+
         generateIntFile(code1, intFile);
-        Pass1.locCounter(intFile);
+
+        Pass1 pass1 = new Pass1();
+        pass1.locCounter(intFile);
+
+        Pass2 pass2 = new Pass2();
+        pass2.openFiles();
+
+        /*for(Instruction i : Pass2.code){
+            System.out.println(i.loc + " " + i.label + " " +
+                    i.Mnemonic + " " + i.operand + " " + i.opcode + " " + i.format);
+        }*/
+
+
     }
     public static void generateIntFile(File inFile, File outFile) {
 
@@ -33,11 +47,10 @@ public class Main {
                     writeOutFile.println(line);
                 }
             }
-
-            System.out.println("file processed successfully");
+            System.out.println("Intermediate file processed successfully");
         }
         catch (IOException e) {
-            System.out.println("error processing the file" + e.getMessage());
+            System.out.println("Error processing the file" + e.getMessage());
         }
         finally {
             //closes files

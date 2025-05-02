@@ -1,16 +1,19 @@
 SUM       START   0000        
-0000	LDX     #0          
-0003	LDA     #0          
-0006	+LDB    #TABLE2     
+0000	FLOAT               
+0001	LDA     #0          
+0004	+LDB     #TABLE2    
 		BASE    TABLE2      
-000A	LOOP      ADD     TABLE,X     
-000D	ADD     TABLE2,X    
-0010	TIX     COUNT       
-0013	JLT     LOOP        
-0016	+STA    TOTAL       
-001A	RSUB                
-001D	COUNT     RESW    1           
-0020	TABLE     RESW    2000        
-1790	TABLE2    RESW    2000        
-2F00	TOTAL     RESW    1          
-2F03	END     SUM         
+0008	LOOP     ADD     TABLE,X     
+000B	ADD     TABLE2,X    
+000E	@TIX     COUNT      
+0011	JLT     LOOP        
+0014	+STA     TOTAL      
+0018	RSUB                
+001B	COMPR   X,A         
+001D	CLEAR   A           
+001F	EOF      BYTE    C'EOF'      
+0022	COUNT    BYTE    X'F123'     
+0024	TABLE    RESW    2000        
+1794	TABLE2   WORD    2000        
+1797	TOTAL    WORD    20,10,30    
+17A0	END     SUM         

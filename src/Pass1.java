@@ -2,13 +2,14 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
 public class Pass1 {
-    static int locCount;
-    static int startingAddress;
-    static Instruction instruction = new Instruction();
 
-    public static void locCounter (File intFile){
-        //File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
-        File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
+     int locCount;
+     int startingAddress;
+     Instruction instruction = new Instruction();
+
+    public  void locCounter (File intFile){
+        File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        //File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         Scanner intFileReader = null;
         PrintWriter pass1Write = null;
         try {
@@ -40,8 +41,8 @@ public class Pass1 {
                 parts = line.split("\\s+");
 
 
-                // place instruction in inst obj based on length (checkin if there's a label)
-                if(parts.length == 2){
+                // place instruction in inst obj based on length (checking if there's a label)
+                if (parts.length == 2){
                     instruction.Mnemonic =  parts[0];
                     instruction.operand = parts[1];
                 }
@@ -53,8 +54,10 @@ public class Pass1 {
                 else {
                     instruction.Mnemonic =  parts[0];
                 }
-
                 if (instruction.Mnemonic.equals("BASE")){
+                    continue;
+                }
+                if (instruction.Mnemonic.equals("END")){
                     continue;
                 }
 
@@ -62,21 +65,17 @@ public class Pass1 {
                 instruction.format = Instruction.findFormat(instruction.Mnemonic);
                 instruction.opcode = Instruction.findOpcode(instruction.Mnemonic);
 
-
-                // inc locount based on format
-                if (instruction.Mnemonic.equals("END")){
-                    continue;
-                }
-                if (instruction.format == 1){
-                    locCount += 1;
-                }
-                else if (instruction.format == 2){
+                // inc locCount based on format
+                if (instruction.format == 1)
+                    locCount++;
+                else if (instruction.format == 2)
                     locCount += 2;
-                }
-                else if (instruction.format == 3 && !instruction.operand.startsWith("+")){
+                else if (instruction.format == 3)
                     locCount += 3;
-                }
-                else if(line.contains("RESW")){
+                else if (instruction.format == 4)
+                    locCount += 4;
+
+                else if (line.contains("RESW")){
                     // Parse the operand as decimal (since assembler directives use decimal numbers)
                     int decimalValue = Integer.parseInt(instruction.operand);
                     // Convert to bytes (RESW = 3 bytes per word)
@@ -84,32 +83,36 @@ public class Pass1 {
                     // Advance the location counter (which is stored as hexadecimal internally)
                     locCount += bytesToAdvance;
                 }
-                else if(line.contains("RESB")){
+                else if (line.contains("RESB")){
                     locCount += Integer.parseInt(instruction.operand,16);
                 }
-                else if(line.contains("WORD")){
-                    if(instruction.operand.contains(",")){
-                        int count = parts.length;
-                        locCount += count * 3 - 1;
+                else if (line.contains("WORD")){
+                    if (line.contains(",")){
+                        String[] words = line.split(",");
+                        locCount += words.length * 3;
                     }
-                    else{
+                    else {
                         locCount += 3;
                     }
                 }
-                else if(line.contains("BYTE")){
-                    locCount += 1;
+                else if (line.contains("BYTE")){
+                    switch (instruction.operand.charAt(0)){
+                        // if hex value, remove X'' and divide by 2. ex: X'F12356' --> 9 - 3 = 6 --> 6 / 2 = 3 SP locCount += 3 (3 bytes)
+                        case 'X' : locCount += (instruction.operand.length() - 3) / 2;
+                        break;
+                        // if char, remove C''. ex: C'EOF' - 3 = 3 (3 bytes; 1 byte for each char)
+                        case 'C' : locCount += instruction.operand.length() - 3;
+                        break;
+                    }
                 }
-                else {
-                    locCount += 4;
-                }
+
+                //assign loc to instr
+                instruction.loc = String.valueOf(locCount);
+
             }
-
-
-
         }
         catch (Exception e){
             System.out.println("Error: " + e);
-            e.getMessage();
         }
         finally {
             if (intFileReader != null) {
@@ -122,9 +125,9 @@ public class Pass1 {
         }
     }
 
-    public static void symTable(File out_pass1){
-       // File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
-        File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
+    public  void symTable(File out_pass1){
+        File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
+        //File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
 
         Scanner pass1Reader = null;
         PrintWriter symFileWrite = null;
