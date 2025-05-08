@@ -2,14 +2,14 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
 public class Pass1 {
-
-     int locCount;
+    static int baseAddress = -1;
+    int locCount;
      int startingAddress;
      Instruction instruction = new Instruction();
-
+     Map<String,String> symbolTable =new HashMap<>();
     public  void locCounter (File intFile){
-        File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
-        //File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
+        //File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         Scanner intFileReader = null;
         PrintWriter pass1Write = null;
         try {
@@ -54,7 +54,31 @@ public class Pass1 {
                 else {
                     instruction.Mnemonic =  parts[0];
                 }
-                if (instruction.Mnemonic.equals("BASE")){
+                if (instruction.Mnemonic.equals("BASE")) {
+                    // The operand is probably in parts[1], e.g., "LDA" or "0x1000" or "SYMBOL"
+                    String operand = parts.length > 1 ? parts[1] : null;
+                    baseAddress = 0;
+
+                    if (operand != null) {
+                        // Try parsing as address
+                        try {
+                            // If operand is an address (like 0x1000), parse as hex
+                            if (operand.startsWith("0x") || operand.matches("[0-9A-Fa-f]+")) {
+                                baseAddress = Integer.parseInt(operand.replace("0x", ""), 16);
+                            } else {
+                                // It's a symbol; look up its address in the symbol table
+                                String symAddr = symbolTable.get(operand);
+                                if (symAddr != null) {
+                                    baseAddress = Integer.parseInt(symAddr, 16);
+                                } else {
+                                    System.out.println("Undefined symbol for BASE: " + operand);
+                                }
+                            }
+                            System.out.println("Base address set to: " + Integer.toHexString(baseAddress));
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid BASE operand: " + operand);
+                        }
+                    }
                     continue;
                 }
                 if (instruction.Mnemonic.equals("END")){
@@ -126,8 +150,8 @@ public class Pass1 {
     }
 
     public  void symTable(File out_pass1){
-        File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
-        //File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
+        //File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
+        File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
 
         Scanner pass1Reader = null;
         PrintWriter symFileWrite = null;
@@ -143,6 +167,7 @@ public class Pass1 {
                 if (parts.length == 4){
                     // counter & label
                     symFileWrite.println(parts[0] + "\t" + parts[1]);
+                    symbolTable.put(parts[1], parts[0]);
                 }
             }
         }
@@ -157,6 +182,10 @@ public class Pass1 {
                 symFileWrite.close();
             }
         }
+    }
+
+    public Map<String, String> getSymbolTable() {
+        return Collections.unmodifiableMap(symbolTable);
     }
 
 }

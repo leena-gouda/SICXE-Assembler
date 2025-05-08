@@ -1,15 +1,15 @@
 loc 		 label 		 instr 		 operand 		 obj code
 		SUM		START		0000		
 0000				FLOAT				C0
-0001				LDA		#0		
+0001				LDA		#0		010000
 0004				+LDB		#TABLE2		
 				BASE		TABLE2		
-0008		LOOP		ADD		TABLE,X		
-000B				ADD		TABLE2,X		
-000E				@TIX		COUNT		
-0011				JLT		LOOP		
+0008		LOOP		ADD		TABLE,X		1BA019
+000B				ADD		TABLE2,X		1BC000
+000E				@TIX		COUNT		java.lang.NumberFormatException: For input string: "COUNT"
+0011				JLT		LOOP		java.lang.NumberFormatException: For input string: "LOOP"
 0014				+STA		TOTAL		
-0018				RSUB				
+0018				RSUB				java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "inst.operand" is null
 001B				COMPR		X,A		A010
 001D				CLEAR		A		B400
 001F		EOF		BYTE		C'EOF'		454F46

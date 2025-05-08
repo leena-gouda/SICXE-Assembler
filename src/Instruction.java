@@ -9,6 +9,7 @@ public class Instruction {
     String operand;
     String label;
     String loc;
+    String base;
 
     static List<Instruction> instructions = new ArrayList<>();
 
@@ -50,5 +51,4 @@ public class Instruction {
         }
         return "";
     }
-
 }
