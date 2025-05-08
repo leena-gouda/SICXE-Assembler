@@ -1,20 +1,20 @@
-loc 		 label 		 instr 		 operand 		 obj code
-		SUM		START		0000		
-0000				FLOAT				C0
-0001				LDA		#0		010000
-0004				+LDB		#TABLE2		
-				BASE		TABLE2		
-0008		LOOP		ADD		TABLE,X		1BA019
-000B				ADD		TABLE2,X		1BC000
-000E				@TIX		COUNT		java.lang.NumberFormatException: For input string: "COUNT"
-0011				JLT		LOOP		java.lang.NumberFormatException: For input string: "LOOP"
-0014				+STA		TOTAL		
-0018				RSUB				java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "inst.operand" is null
-001B				COMPR		X,A		A010
-001D				CLEAR		A		B400
-001F		EOF		BYTE		C'EOF'		454F46
-0022		COUNT		BYTE		X'F123'		F123
-0024		TABLE		RESW		2000		
-1794		TABLE2		WORD		2000		0007D0
-1797		TOTAL		WORD		20,10,30		00001400000A00001E
-17A0				END		SUM		
+loc		label		instr		operand		obj code
+        SUM             START   0000                    
+0000                    FLOAT                   C0      
+0001                    LDA     #0              010000  
+0004                    +LDB    #TABLE2         6911794 
+                        BASE    TABLE2          
+0008    LOOP            ADD     TABLE,X         1BA019  
+000B                    ADD     TABLE2,X        1BC000  
+000E                    @TIX    COUNT           2E2011  
+0011                    JLT     LOOP            java.lang.NumberFormatException: For input string: "LOOP"
+0014                    +STA    TOTAL           0F11797 
+0018                    RSUB                    java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "inst.operand" is null
+001B                    COMPR   X,A             A010    
+001D                    CLEAR   A               B400    
+001F    EOF             BYTE    C'EOF'          454F46  
+0022    COUNT           BYTE    X'F123'         F123    
+0024    TABLE           RESW    2000                    
+1794    TABLE2          WORD    2000            0007D0  
+1797    TOTAL           WORD    20,10,30        00001400000A00001E
+17A0                    END     SUM                     

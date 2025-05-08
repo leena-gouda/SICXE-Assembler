@@ -1,10 +1,8 @@
 import javax.swing.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Pass2 {
 
@@ -12,15 +10,18 @@ public class Pass2 {
     public List<String> objectCodes = new ArrayList<>();
     String objCode;
     private final Map<String, String> symbolTable;
+
     public Pass2(Map<String, String> symbolTable) {
         this.symbolTable = symbolTable;
     }
+
     public String getLocationForLabel(String label) {
         return symbolTable.get(label);
     }
+
     // open file handle code
-    public void openFiles(){
-       // File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+    public void openFiles() {
+        // File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
         //File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
         File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
@@ -28,53 +29,53 @@ public class Pass2 {
         handleCode(pass1_out, pass2_out);
     }
 
-    public void handleCode(File pass1_out, File pass2_out){
+    public void handleCode(File pass1_out, File pass2_out) {
 
         Scanner pass1Scan = null;
         PrintWriter pass2Write = null;
 
         try {
-            pass1Scan =  new Scanner(pass1_out);
+            pass1Scan = new Scanner(pass1_out);
             pass2Write = new PrintWriter(pass2_out);
-            pass2Write.println("loc \t\t label \t\t instr \t\t operand \t\t obj code");
+            pass2Write.println("loc\t\tlabel\t\tinstr\t\toperand\t\tobj code");
             Instruction i = null;
-            while(pass1Scan.hasNextLine()){
+            while (pass1Scan.hasNextLine()) {
 
                 i = new Instruction();
                 String line = pass1Scan.nextLine();
-                String [] parts = line.split("\\s+");
+                String[] parts = line.split("\\s+");
 
                 // assign parts of each line to each instr object
 
                 // for start dir
-                if (parts.length == 3 && parts[1].equals("START")){
+                if (parts.length == 3 && parts[1].equals("START")) {
                     i.label = parts[0];
-                    i.Mnemonic =  parts[1];
+                    i.Mnemonic = parts[1];
                     i.operand = parts[2];
                 }
                 // if there's no label
-                else if (parts.length == 3){
-                    i.loc =  parts[0];
-                    i.Mnemonic =  parts[1];
+                else if (parts.length == 3) {
+                    i.loc = parts[0];
+                    i.Mnemonic = parts[1];
                     i.operand = parts[2];
                 }
                 // if there's a label
-                else if (parts.length == 4){
-                    i.loc =  parts[0];
-                    i.label =  parts[1];
+                else if (parts.length == 4) {
+                    i.loc = parts[0];
+                    i.label = parts[1];
                     i.Mnemonic = parts[2];
                     i.operand = parts[3];
                 }
                 // for base dir
-                else if (line.contains("BASE")){
-                    i.Mnemonic =  parts[0];
-                    i.operand =  parts[1];
+                else if (line.contains("BASE")) {
+                    i.Mnemonic = parts[0];
+                    i.operand = parts[1];
                     i.base = i.loc;
                 }
                 // for f1 instructions
-                else if (parts.length == 2){
-                    i.loc =  parts[0];
-                    i.Mnemonic =  parts[1];
+                else if (parts.length == 2) {
+                    i.loc = parts[0];
+                    i.Mnemonic = parts[1];
                 }
 
                 // assign format and opcode to each inst obj
@@ -85,53 +86,59 @@ public class Pass2 {
                 Pass2.code.add(i);
 
             }
-            for (Instruction instr : code){
+            for (Instruction instr : code) {
                 // go to generateObjCode method
                 objCode = generateObjCode(instr);
 
                 System.out.println(instr.Mnemonic + " " + objCode);
 
                 // write in file
-                if (instr.label == null){
+                if (instr.label == null) {
                     instr.label = "";
                 }
-                if (instr.loc == null){
+                if (instr.loc == null) {
                     instr.loc = "";
                 }
-                if (instr.operand == null){
+                if (instr.operand == null) {
                     instr.operand = "";
                 }
-                if (!objCode.isEmpty()){
+                if (!objCode.isEmpty()) {
                     objectCodes.add(objCode);
                 }
-                // write in file
-                pass2Write.write(instr.loc + "\t\t" + instr.label + "\t\t" + instr.Mnemonic + "\t\t" +
-                        instr.operand + "\t\t" + objCode + "\n");
+
+                String loc = instr.loc != null ? instr.loc : "";
+                String label = instr.label != null ? instr.label : "";
+                String mnemonic = instr.Mnemonic != null ? instr.Mnemonic : "";
+                String operand = instr.operand != null ? instr.operand : "";
+                // Special handling for directives
+                if (mnemonic.equals("BASE")) {
+                    pass2Write.printf("%-8s%-16s%-8s%-16s%n", "", "", "BASE", operand);
+                    continue;
+                }
+                // Format with tabs and fixed spacing
+                pass2Write.printf("%-8s%-16s%-8s%-16s%-8s%n", loc, label, mnemonic, operand, objCode);
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e + "here");
-        }
-        finally {
+        } finally {
             if (pass1Scan != null) {
                 pass1Scan.close();
             }
             if (pass2Write != null) {
                 pass2Write.close();
             }
+            HTMERecords(pass2_out,Pass2.code);
         }
     }
 
-    public String generateObjCode(Instruction i){
+    public String generateObjCode(Instruction i) {
         // no obj code for these directives
         if (i.Mnemonic.equals("START") || i.Mnemonic.equals("END") || i.Mnemonic.equals("BASE")
-                || i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")){
+                || i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")) {
             return "";
-        }
-        else if (i.Mnemonic.equals("BYTE")){
+        } else if (i.Mnemonic.equals("BYTE")) {
             return handleByteDirective(i.operand);
-        }
-        else if (i.Mnemonic.equals("WORD")){
+        } else if (i.Mnemonic.equals("WORD")) {
             // if there is more than 1 word
             if (i.operand.contains(",")) {
                 // seperate at ,
@@ -151,7 +158,7 @@ public class Pass2 {
                 case 1 -> i.opcode; // f1 -> opcode only
                 case 2 -> handleFormat2(i);
                 case 3 -> handleFormat3(i);
-                //case 4 -> handleFormat4(i);
+                case 4 -> handleFormat4(i);
                 default -> "";
             };
         }
@@ -160,13 +167,13 @@ public class Pass2 {
     public String handleByteDirective(String operand) {
         // remove X or C prefix
         String pureOperand = operand.substring(2, operand.length() - 1);
-        if (operand.startsWith("C")){
+        if (operand.startsWith("C")) {
             StringBuilder objCode = new StringBuilder();
             // converts string to byte array and loops through it
             for (byte b : pureOperand.getBytes()) {
                 // converts byte ASCII to hex string and uppercase
                 String hex = Integer.toHexString(b & 0xFF).toUpperCase();
-                if (hex.length() == 1){
+                if (hex.length() == 1) {
                     objCode.append('0');
                 }
                 // concatenates to string builder
@@ -184,7 +191,7 @@ public class Pass2 {
         return String.format("%06X", value);
     }
 
-    public String handleFormat2(Instruction i){
+    public String handleFormat2(Instruction i) {
         // split operand at ,
         String[] regs = i.operand.split(",");
         String reg1 = registerCode(regs[0]);
@@ -358,44 +365,43 @@ public class Pass2 {
         int b = 0;
         int p = 0;
         int e = 0;
-        if (inst.operand.startsWith("#")){
+        if (inst.operand.startsWith("#")) {
             n = 0;
             i = 1;
             x = 0;
             e = inst.Mnemonic.startsWith("+") ? 1 : 0;
-            if(e == 1) handleFormat4(inst);
+            //if(e == 1) handleFormat4(inst);
             String valuePart = inst.operand.substring(1);
-            if(valuePart.matches("\\d+")){
+            if (valuePart.matches("\\d+")) {//checks if its a number
                 p = 0;
                 b = 0;
-            }
-            else{
+            } else {//else its a label
                 String loc = symbolTable.get(valuePart);
                 System.out.println("Symbol table entry for " + valuePart + ": " + loc);
 
-                if(loc != null){
-                    if(Integer.parseInt(loc,16) >= -2048 &&  Integer.parseInt(loc,16) <= 2047){
+                if (loc != null) {
+                    //if the label is in the symbol table check if its pc relative
+                    if (Integer.parseInt(loc, 16) >= -2048 && Integer.parseInt(loc, 16) <= 2047) {
                         p = 1;
                         b = 0;
-                    }else{
+                    } else { //else base relative
                         p = 0;
                         b = 1;
                     }
-                 }
+                }
 //                else {
 //                    p = 0;
 //                    b = 0;
 //                }
             }
-        }
-        else if(inst.operand.contains(",X")){
+        } else if (inst.operand.contains(",X")) {
             n = 1;
             i = 1;
             x = 1;  // Indexed mode
             e = inst.Mnemonic.startsWith("+") ? 1 : 0;
-            if(e == 1) handleFormat4(inst);
+            // if(e == 1) handleFormat4(inst);
             String baseOperand = inst.operand.split(",")[0];
-            if(baseOperand.matches("\\d+")){
+            if (baseOperand.matches("\\d+")) {//checks if its a number
                 p = 0;
                 b = 0;
                 /*if(Integer.parseInt(baseOperand) >= -2048 &&  Integer.parseInt(baseOperand) <= 2047){
@@ -405,14 +411,15 @@ public class Pass2 {
                     p = 0;
                     b = 1;
                 }*/
-            }else {
+            } else {//else label
                 String loc = symbolTable.get(baseOperand);
                 System.out.println("Symbol table entry for " + baseOperand + ": " + loc);
-                if(loc != null){
-                    if(Integer.parseInt(loc,16) >= -2048 &&  Integer.parseInt(loc,16) <= 2047){
+                if (loc != null) {
+                    //if the label is in the symbol table check if its pc relative
+                    if (Integer.parseInt(loc, 16) >= -2048 && Integer.parseInt(loc, 16) <= 2047) {
                         p = 1;
                         b = 0;
-                    }else {
+                    } else { //else base relative
                         p = 0;
                         b = 1;
                     }
@@ -427,24 +434,25 @@ public class Pass2 {
             i = 0;
             x = 0;
             e = inst.Mnemonic.startsWith("+") ? 1 : 0;
-            if(e == 1) handleFormat4(inst);
+            //if(e == 1) handleFormat4(inst);
             String symbol = inst.operand;
 
-            if(symbol.matches("\\d+")){
+            if (symbol.matches("\\d+")) {//checks if its a number
                 p = 0;
                 b = 0;
                /* if(Integer.parseInt(symbol) >= -2048 &&  Integer.parseInt(symbol) <= 2047){
                     p = 1;
                     b = 0;
                 }*/
-            }else {
+            } else {//else label
                 String loc = symbolTable.get(symbol);
                 System.out.println("Symbol table entry for " + symbol + ": " + loc);
-                if(loc != null){
-                    if(Integer.parseInt(loc,16) >= -2048 &&  Integer.parseInt(loc,16) <= 2047){
+                if (loc != null) {
+                    //if the label is in the symbol table check if its pc relative
+                    if (Integer.parseInt(loc, 16) >= -2048 && Integer.parseInt(loc, 16) <= 2047) {
                         p = 1;
                         b = 0;
-                    }else {
+                    } else {//else base relative
                         p = 0;
                         b = 1;
                     }
@@ -455,22 +463,22 @@ public class Pass2 {
 //                }
             }
 
-        } else if (inst.Mnemonic.startsWith("+")) {
+        } else if (inst.Mnemonic.startsWith("+")) {//if its format 4
             n = 1;
             i = 1;
             x = 0;
             b = 0;
             p = 0;
             e = 1;
-            handleFormat4(inst);
-        } else if(Integer.parseInt(inst.operand) >= -2048 &&  Integer.parseInt(inst.operand) <= 2047){
+            // handleFormat4(inst);
+        } else if (Integer.parseInt(inst.operand) >= -2048 && Integer.parseInt(inst.operand) <= 2047) {//pc relative
             n = 1;
             i = 1;
             x = 0;
             b = 0;
             p = 1;
             e = 0;
-        }else{
+        } else {//base relative
             n = 1;
             i = 1;
             x = 0;
@@ -478,45 +486,54 @@ public class Pass2 {
             p = 0;
             e = 0;
         }
+        if (e == 1) {
+            p = 0;
+            b = 0;
+        }
         return "" + n + i + x + b + p + e;
     }
 
-    public String handleFormat3(Instruction i){
+    public String handleOpCode(Instruction i) {
+        // 1. Convert hex opcode to binary
+        String binaryOpcode = hexToBinary(i.opcode);
+        // 2. Remove last 2 bits
+        if (binaryOpcode.length() >= 2) {
+            binaryOpcode = binaryOpcode.substring(0, binaryOpcode.length() - 2);
+        }
+        // 3. Pad to 6 bits (for format 3 instructions)
+        binaryOpcode = String.format("%6s", binaryOpcode).replace(' ', '0');
+        return binaryOpcode;
+    }
+
+    public String handleFormat3(Instruction i) {
         File pass1Out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         Scanner in = null;
         try {
             in = new Scanner(pass1Out);
             Pass1 pass = new Pass1();
             int base = pass.baseAddress;
-            String disp = dis(i,Integer.parseInt(i.loc, 16),base);
-            // 1. Convert hex opcode to binary
-            String binaryOpcode = hexToBinary(i.opcode);
-            // 2. Remove last 2 bits
-            if (binaryOpcode.length() >= 2) {
-                binaryOpcode = binaryOpcode.substring(0, binaryOpcode.length() - 2);
-            }
-            // 3. Pad to 6 bits (for format 3 instructions)
-            binaryOpcode = String.format("%6s", binaryOpcode).replace(' ', '0');
+            String disp = dis(i, Integer.parseInt(i.loc, 16), base);
+            String opcode = handleOpCode(i);
             // 4. Get flags
             String flags = flagCode(i);
             // 5. Combine opcode (6 bits) + flags (6 bits)
-            String combinedBinary = binaryOpcode + flags;
+            String combinedBinary = opcode + flags;
             // 6. Convert to hex (3 hex digits)
             String combinedHex = binaryToHex(combinedBinary);
             // 7. Format displacement to 3 hex digits
-            String formattedDisp = formatDisplacement(disp,i);
+            String formattedDisp = formatDisplacement(disp, i);
 
             // 8. Combine everything (3 + 3 hex digits)
             return combinedHex + formattedDisp;
-        }catch (Exception e) {
+        } catch (Exception e) {
             return e.toString();
-        }
-        finally {
+        } finally {
             if (in != null) {
                 in.close();
             }
         }
     }
+
     // Helper method to convert hex to binary
     private String hexToBinary(String hex) {
         // Remove any 'x' or 'h' suffix if present
@@ -527,8 +544,9 @@ public class Pass2 {
                         Integer.toBinaryString(Integer.parseInt(hex, 16)))
                 .replace(' ', '0');
     }
+
     // Helper method to format displacement
-    private String formatDisplacement(String disp,Instruction inst) {
+    private String formatDisplacement(String disp, Instruction inst) {
         try {
             // If it's already a hex number
             if (disp.matches("[0-9A-Fa-f]+")) {
@@ -541,24 +559,25 @@ public class Pass2 {
                 return String.format("%03X", value & 0xFFF); // Ensure 12-bit value
             }
             // For labels or other cases
-            else if(symbolTable.containsKey(disp)) {
+            else if (symbolTable.containsKey(disp)) {
                 int symbolAddress = Integer.parseInt(symbolTable.get(disp));
                 int displacement = symbolAddress - (Integer.parseInt(inst.loc)); // PC-relative addressing
                 return String.format("%03X", displacement & 0xFFF);
                 //return "000"; // Placeholder - you'll need symbol resolution here
-            }
-            else {
+            } else {
                 return "000";
             }
         } catch (NumberFormatException e) {
             return "000"; // Fallback value
         }
     }
+
     // Your existing binaryToHex method
     private String binaryToHex(String binary) {
         int decimal = Integer.parseInt(binary, 2);
         return String.format("%03X", decimal);
     }
+
     public String calDisp(Instruction i, Scanner in) {
         String flag = flagCode(i);
         String disp = "";
@@ -567,16 +586,16 @@ public class Pass2 {
         if (flag == "110001") {
             disp = i.loc;
             return disp;
-        }else if (flag.equals("110010")) {  // PC-relative
-                String label = i.operand;
-                String targetLoc = symbolTable.get(label);
-                if (targetLoc == null) {
-                    System.out.println("Undefined label: " + label);
-                }
-                int target = Integer.parseInt(targetLoc, 16);
-                int pc = Integer.parseInt(i.loc, 16) + 3;  // PC points to next instruction
-                disp = Integer.toHexString(target - pc);
-            } else if (flag == "110100") {
+        } else if (flag.equals("110010")) {  // PC-relative
+            String label = i.operand;
+            String targetLoc = symbolTable.get(label);
+            if (targetLoc == null) {
+                System.out.println("Undefined label: " + label);
+            }
+            int target = Integer.parseInt(targetLoc, 16);
+            int pc = Integer.parseInt(i.loc, 16) + 3;  // PC points to next instruction
+            disp = Integer.toHexString(target - pc);
+        } else if (flag == "110100") {
             x = Integer.parseInt(symbolTable.get(i.operand)) + Integer.parseInt(i.base);
             disp = String.valueOf(x);
             return disp;
@@ -631,20 +650,21 @@ public class Pass2 {
         }
         return disp;
     }
+
     public String calDis(Instruction i, Scanner in) {
         String flag = flagCode(i);
         String disp = "";
         int x;
         String objcode;
-        try{
+        try {
             if (flag == "110001") {
                 disp = i.loc;
             } else if (flag == "110010") {
-                x = Integer.parseInt(symbolTable.getOrDefault(i.operand,"0"),16);
-                int pc =  Integer.parseInt(in.nextLine(), 16);
+                x = Integer.parseInt(symbolTable.getOrDefault(i.operand, "0"), 16);
+                int pc = Integer.parseInt(in.nextLine(), 16);
                 disp = Integer.toHexString(x - pc);
             } else if (flag == "110100") {
-                x = Integer.parseInt(symbolTable.getOrDefault(i.operand,"0"),16);
+                x = Integer.parseInt(symbolTable.getOrDefault(i.operand, "0"), 16);
                 int base = Integer.parseInt(in.nextLine(), 16);
                 disp = Integer.toHexString(x - base);
             } else if (flag == "111000") {
@@ -668,31 +688,29 @@ public class Pass2 {
             } /*else if (flag == "100000") {
                     disp = ;
                     return disp;
-            }*/
-            else if (flag == "100001") {
-        disp = i.loc;
+            }*/ else if (flag == "100001") {
+                disp = i.loc;
 
-    } else if (flag == "100010") {
-        x =  Integer.parseInt(symbolTable.getOrDefault(i.operand, "0"), 16);
-        int pc = Integer.parseInt(in.nextLine(), 16);
-        disp = Integer.toHexString(x - pc);
+            } else if (flag == "100010") {
+                x = Integer.parseInt(symbolTable.getOrDefault(i.operand, "0"), 16);
+                int pc = Integer.parseInt(in.nextLine(), 16);
+                disp = Integer.toHexString(x - pc);
 
-    } else if (flag == "100100") {
-        x =  Integer.parseInt(symbolTable.getOrDefault(i.operand, "0"), 16);
-        int base = Integer.parseInt(i.base, 16);
-        disp = Integer.toHexString(x - base);
+            } else if (flag == "100100") {
+                x = Integer.parseInt(symbolTable.getOrDefault(i.operand, "0"), 16);
+                int base = Integer.parseInt(i.base, 16);
+                disp = Integer.toHexString(x - base);
 
-    } else if (flag == "010000") {
-        if (i.operand.matches("\\d+")) {
-            disp = i.operand;
-        } else {
-            disp = symbolTable.getOrDefault(i.operand.substring(1), "0");
-        }
-    }
-            else {
-        // Default case - should ideally never happen
-        disp = "0";
-    }/*else if (flag == "010001") {
+            } else if (flag == "010000") {
+                if (i.operand.matches("\\d+")) {
+                    disp = i.operand;
+                } else {
+                    disp = symbolTable.getOrDefault(i.operand.substring(1), "0");
+                }
+            } else {
+                // Default case - should ideally never happen
+                disp = "0";
+            }/*else if (flag == "010001") {
                 disp = i.loc;
                 return disp;
             } else if (flag == "010010") {
@@ -705,11 +723,10 @@ public class Pass2 {
                 return disp;
             }*/
             return disp;
-}
-        catch (NumberFormatException e) {
-        return "000";  // Fallback value
+        } catch (NumberFormatException e) {
+            return "000";  // Fallback value
         }
-        }
+    }
 
     public String dis(Instruction inst, int currentAddress, int baseAddress) {
         // Default displacement for errors or no displacement needed
@@ -780,8 +797,7 @@ public class Pass2 {
                         disp = String.format("%03X", baseDisp & 0xFFF);
                     }
                 }
-            }
-            else if ("111100".equals(flag) || "100100".equals(flag)) {
+            } else if ("111100".equals(flag) || "100100".equals(flag)) {
                 // Base-relative addressing
                 if (baseAddress != -1) {
                     int displacement = targetAddr - baseAddress;
@@ -813,7 +829,173 @@ public class Pass2 {
 
         return symbol;
     }
-    public String handleFormat4(Instruction i){
-        return "";
+
+    public String handleFormat4(Instruction i) {
+        String flag = flagCode(i);
+        String address;
+        if (i.operand.startsWith("#") || i.operand.contains(",X")) {
+            address = symbolTable.get(i.operand.substring(1));
+        } else {
+            address = symbolTable.get(i.operand);
+        }
+        String opcode = handleOpCode(i);
+        if (address != null) {
+            return binaryToHex("" + opcode + flag) + address;
+        } else {
+            return "label not found in symbol table";
+        }
+    }
+
+    public void HTMERecords(File pass2out,List<Instruction> inst) {
+        File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
+        Scanner pass2Reader = null;
+        PrintWriter htmeWriter = null;
+        try {
+            pass2Reader = new Scanner(pass2out);
+            htmeWriter = new PrintWriter(htmeFile);
+            String H = HRecord(pass2out);
+            System.out.println(H);
+            String M = "";
+            htmeWriter.println(H);
+            for (Instruction i : inst) {
+                String currentAddress = i.loc;
+                if(i.Mnemonic.startsWith("+")){
+                    M = MRecord(currentAddress,i);
+                    htmeWriter.println(M);
+                    System.out.println(M);
+                }
+            }
+            String E = ERecord(pass2out);
+            htmeWriter.println(E);
+            System.out.println(E);
+        } catch (FileNotFoundException e) {
+            System.err.printf("Error opening file '%s'%n", pass2out.getAbsolutePath());
+        }
+        finally {
+            if (pass2Reader != null) {
+                pass2Reader.close();
+            }
+            if (htmeWriter != null) {
+                htmeWriter.close();
+            }
+        }
+    }
+
+
+    public String HRecord(File pass2Out) {
+        Scanner pass2Reader = null;
+        try {
+            pass2Reader = new Scanner(pass2Out);
+            String name = "";
+            int startingAddress = 0;
+            int endAddress = 0;
+
+            // Skip header line if exists
+            if (pass2Reader.hasNextLine()) {
+                String line = pass2Reader.nextLine();
+                if (line.trim().startsWith("loc") || line.trim().startsWith("address")) {
+                    if (pass2Reader.hasNextLine()) {
+                        line = pass2Reader.nextLine();
+                    }
+                }
+
+                // Parse first actual code line
+                String[] parts = line.trim().split("\\s+");
+                System.out.println("First code line parts: " + Arrays.toString(parts));
+
+                if (parts.length >= 3 && parts[1].equals("START")) {
+                    name = parts[0];  // Program name is first element
+                    startingAddress = Integer.parseInt(parts[2], 16);  // Address is third element
+                }
+            }
+
+            // Find END directive
+            while (pass2Reader.hasNextLine()) {
+                String line = pass2Reader.nextLine().trim();
+                String[] parts = line.split("\\s+");
+
+                if (parts.length >= 2 && parts[1].equals("END")) {
+                    // Get address from first column of END line
+                    if (!parts[0].isEmpty()) {
+                        endAddress = Integer.parseInt(parts[0], 16);
+                    }
+                    break;
+                }
+            }
+
+            // Handle name padding
+            if (name.isEmpty()) {
+                name = "XXXXXX";
+            } else {
+                name = name.length() > 6 ? name.substring(0, 6)
+                        : String.format("%-6s", name).replace(' ', 'X');
+            }
+
+            // Calculate program length
+            int programLength = endAddress - startingAddress;
+
+            // Format the H record
+            return "H" + name.toUpperCase() + String.format("%06X", startingAddress) + String.format("%06X", programLength);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "HXXXXXX000000000000";
+        } finally {
+            if (pass2Reader != null) {
+                pass2Reader.close();
+            }
+        }
+    }
+
+    public String TRECord(File pass2out) {
+        Scanner pass2Reader = null;
+        try {
+
+            return "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public String MRecord(String currentAddress,Instruction inst) {
+        int address = Integer.parseInt(currentAddress,16) + 1;
+        double halfByte = 20/(8 * 0.5);
+        int hb = (int) halfByte;
+        return  "M" + String.format("%06X", address) +String.format("%02X", hb);
+    }
+
+    public String ERecord(File pass2out) {
+        Scanner pass2Reader = null;
+        try {
+            pass2Reader = new Scanner(pass2out);
+            int startingAddress = 0;
+
+            // Skip header line if exists
+            if (pass2Reader.hasNextLine()) {
+                String line = pass2Reader.nextLine();
+                if (line.trim().startsWith("loc") || line.trim().startsWith("address")) {
+                    if (pass2Reader.hasNextLine()) {
+                        line = pass2Reader.nextLine();
+                    }
+                }
+
+                // Parse first actual code line
+                String[] parts = line.trim().split("\\s+");
+                System.out.println("First code line parts: " + Arrays.toString(parts));
+
+                if (parts.length >= 3 && parts[1].equals("START")) {
+                    startingAddress = Integer.parseInt(parts[2], 16);  // Address is third element
+                }
+            }
+            return "E" + String.format("%06X", startingAddress);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "000000";
+        }
+        finally {
+            if (pass2Reader != null) {
+                pass2Reader.close();
+            }
+        }
     }
 }
