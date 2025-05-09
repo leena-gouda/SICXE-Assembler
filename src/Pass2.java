@@ -86,8 +86,6 @@ public class Pass2 {
                 // go to generateObjCode method
                 objCode = generateObjCode(instr);
 
-                //System.out.println(instr.Mnemonic + " " + objCode);
-
                 // write in file
                 if (instr.label == null){
                     instr.label = "";
