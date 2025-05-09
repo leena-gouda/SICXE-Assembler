@@ -16,4 +16,4 @@ SUM     START   0000
 0023	TABLE   RESW    2000        
 1793	TABLE2  WORD    2000        
 1796	TOTAL   WORD    20,10,30    
-179F	END     SUM         
+179F	END     0000        

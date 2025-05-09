@@ -166,8 +166,5 @@ public class Pass1 {
         }
     }
 
-    public Map<String, String> getSymbolTable() {
-         return Collections.unmodifiableMap(symbolTable);
-    }
 
 }

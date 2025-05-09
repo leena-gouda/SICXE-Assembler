@@ -16,4 +16,4 @@ COUNT   BYTE    X'F1'
 TABLE   RESW    2000        
 TABLE2  WORD    2000        
 TOTAL   WORD    20,10,30    
-END     SUM         
+END     0000        
