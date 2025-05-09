@@ -335,7 +335,6 @@ public class Pass2 {
         return String.format("%03X", number);
     }
 
-
     private String handleFormat4(Instruction i) {
         char e = '1';
         char p = '0';
@@ -529,6 +528,7 @@ public class Pass2 {
 
         return finalRecord.toString();
     }
+
 
     private String buildTRecord(int startAddress, List<String> objcodes) {
         int totalBytes = 0;

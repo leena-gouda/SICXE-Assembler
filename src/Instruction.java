@@ -2,7 +2,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Instruction {
-
     String opcode;
     int format;
     String Mnemonic;
@@ -22,7 +21,6 @@ public class Instruction {
     public Instruction() {
 
     }
-
 
     public static int findFormat (String Mnemonic) {
         if (Mnemonic.startsWith("+"))
