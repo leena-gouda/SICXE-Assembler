@@ -10,7 +10,7 @@ public class Instruction {
     String label;
     String loc;
     String base;
-
+    String objCode;
     static List<Instruction> instructions = new ArrayList<>();
 
     public Instruction(String Mnemonic, int format, String opcode) {
