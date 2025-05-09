@@ -16,4 +16,4 @@
 16   TABLE   RESW    2000        ; Reserve 2000 words (6000 bytes) for TABLE
 17   TABLE2  WORD    2000        ; Define word initialized to decimal 2000
 18   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
-19           END     SUM         ; End of program, entry point at SUM
+19           END     0000        ; End of program, entry point at SUM

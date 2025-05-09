@@ -108,7 +108,7 @@ public class Pass2 {
                     objectCodes.add(objCode);
                 }
 
-               String loc = instr.loc != null ? instr.loc : "";
+                String loc = instr.loc != null ? instr.loc : "";
                 String label = instr.label != null ? instr.label : "";
                 String mnemonic = instr.Mnemonic != null ? instr.Mnemonic : "";
                 String operand = instr.operand != null ? instr.operand : "";
@@ -119,6 +119,7 @@ public class Pass2 {
                 }
                 // Format with tabs and fixed spacing
                 pass2Write.printf("%-8s%-16s%-8s%-16s%-8s%n", loc, label, mnemonic, operand, objCode);
+            }
         }
         catch(Exception e){
             e.printStackTrace();
@@ -131,7 +132,7 @@ public class Pass2 {
             if (pass2Write != null) {
                 pass2Write.close();
             }
-            HTMERecords(pass2_out,Pass2.code);
+            HTMERecords(pass2_out);
         }
     }
 
@@ -226,8 +227,8 @@ public class Pass2 {
         if (i.Mnemonic.equals("RSUB")){
             return "4F0000";
         }
-        String opcode = hexToBinary(i.opcode);
-        opcode = opcode.substring(0, opcode.length() - 2);
+
+        String opcode = handleOpCode(i);
 
         String NIX = setNIX(i);
 
@@ -248,9 +249,6 @@ public class Pass2 {
         String disp = addMode.substring(1);
         objCode = binaryToHex(opcode + NIX + b + p + e) + disp;
         return objCode;
-         /*    if (e == 1) {
-            p = 0;
-            b = 0;*/
     }
 
 
@@ -261,17 +259,11 @@ public class Pass2 {
         return String.format("%8s", Integer.toBinaryString(Integer.parseInt(hex, 16))).replace(' ', '0');
     }
 
-
-
-   
-
     private String binaryToHex(String binary) {
         // Parse binary (12 bits) and format as 3 uppercase hex digits
         int decimal = Integer.parseInt(binary, 2);
         return String.format("%03X", decimal);
     }
-
-
 
     private String setNIX (Instruction inst){
         char n;
@@ -319,7 +311,7 @@ public class Pass2 {
             displacement = TAInt - base;
             if (displacement >= 0 && displacement <= 4096) {
                 flagPlusDisp = "b";
-                }
+            }
         }
                 
         //String hexDisp = Integer.toHexString(displacement).toUpperCase();
@@ -343,23 +335,22 @@ public class Pass2 {
 
 
     private String handleFormat4(Instruction i) {
-        String flag = flagCode(i);
-        String address;
-        if (i.operand.startsWith("#") || i.operand.contains(",X")) {
-            address = symbolTable.get(i.operand.substring(1));
-        } else {
-            address = symbolTable.get(i.operand);
-        }
+        char e = '1';
+        char p = '0';
+        char b = '0';
+        String NIX = setNIX(i);
+        String address = getTA(i.operand);
         String opcode = handleOpCode(i);
         if (address != null) {
-            return binaryToHex("" + opcode + flag) + address;
+            return binaryToHex(opcode + NIX + b + p + e) + address;
         } else {
             return "label not found in symbol table";
         }
     }
 
-    public void HTMERecords(File pass2out,List<Instruction> inst) {
-        File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
+    public void HTMERecords(File pass2out) {
+        //File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
+        File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
         Scanner pass2Reader = null;
         PrintWriter htmeWriter = null;
         try {
@@ -369,10 +360,10 @@ public class Pass2 {
             System.out.println(H);
             String M = "";
             htmeWriter.println(H);
-            for (Instruction i : inst) {
+            for (Instruction i : code) {
                 String currentAddress = i.loc;
                 if(i.Mnemonic.startsWith("+")){
-                    M = MRecord(currentAddress,i);
+                    M = MRecord(currentAddress);
                     htmeWriter.println(M);
                     System.out.println(M);
                 }
@@ -392,7 +383,6 @@ public class Pass2 {
             }
         }
     }
-
 
     public String HRecord(File pass2Out) {
         Scanner pass2Reader = null;
@@ -469,7 +459,7 @@ public class Pass2 {
         }
     }
 
-    public String MRecord(String currentAddress,Instruction inst) {
+    public String MRecord(String currentAddress) {
         int address = Integer.parseInt(currentAddress,16) + 1;
         double halfByte = 20/(8 * 0.5);
         int hb = (int) halfByte;
@@ -509,6 +499,12 @@ public class Pass2 {
                 pass2Reader.close();
             }
         }
+    }
+
+    private String handleOpCode(Instruction i) {
+        String opcode = hexToBinary(i.opcode);
+        opcode = opcode.substring(0, opcode.length() - 2);
+        return opcode;
     }
 }
 
