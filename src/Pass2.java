@@ -530,6 +530,7 @@ public class Pass2 {
     }
 
 
+
     private String buildTRecord(int startAddress, List<String> objcodes) {
         int totalBytes = 0;
         StringBuilder mergedCodes = new StringBuilder(); // Stores all objcodes
