@@ -18,11 +18,6 @@ public class Main {
         Pass2 pass2 = new Pass2();
         pass2.openFiles();
 
-        /*for(Instruction i : Pass2.code){
-            System.out.println(i.loc + " " + i.label + " " +
-                    i.Mnemonic + " " + i.operand + " " + i.opcode + " " + i.format);
-        }*/
-
 
     }
     public static void generateIntFile(File inFile, File outFile) {

@@ -106,6 +106,7 @@ public class Pass2 {
                 }
                 if (!objCode.isEmpty()) {
                     objectCodes.add(objCode);
+                    instr.objCode = objCode;
                 }
 
                 String loc = instr.loc != null ? instr.loc : "";
@@ -132,6 +133,9 @@ public class Pass2 {
             if (pass2Write != null) {
                 pass2Write.close();
             }
+            for (String oc : objectCodes){
+                System.out.println(oc);
+            }
             HTMERecords(pass2_out);
         }
     }
@@ -141,7 +145,7 @@ public class Pass2 {
         // no obj code for these directives
         if (i.Mnemonic.equals("START") || i.Mnemonic.equals("END") || i.Mnemonic.equals("BASE")
                 || i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")) {
-            return "";
+            return " ";
         } else if (i.Mnemonic.equals("BYTE")) {
             return handleByteDirective(i.operand);
         } else if (i.Mnemonic.equals("WORD")) {
@@ -165,7 +169,7 @@ public class Pass2 {
                 case 2 -> handleFormat2(i);
                 case 3 -> handleFormat3(i);
                 case 4 -> handleFormat4(i);
-                default -> "";
+                default -> "Invalid Instruction: format not found";
             };
         }
     }
@@ -191,12 +195,13 @@ public class Pass2 {
     }
 
     private String handleWordDirective(String operand) {
+        if (operand == null)
+            return "Operand is null";
         // converts string to int
         int value = Integer.parseInt(operand);
         // formats int into hex string
         return String.format("%06X", value);
     }
-
 
     private String handleFormat2(Instruction i){
         // split operand at ,
@@ -221,11 +226,22 @@ public class Pass2 {
     }
 
     private String handleFormat3(Instruction i){
+
+
         char e = '0';
         char p = '0';
         char b = '0';
+
         if (i.Mnemonic.equals("RSUB")){
             return "4F0000";
+        }
+
+        if(i.operand.isEmpty()){
+            return "Invalid Instruction: no operand";
+        }
+
+        if ((i.operand.startsWith("#") || i.operand.startsWith("@")) && i.operand.endsWith(",X")){
+            return "Invalid instruction: cannot be indexed as well as indirect/immediate";
         }
 
         String opcode = handleOpCode(i);
@@ -250,7 +266,6 @@ public class Pass2 {
         objCode = binaryToHex(opcode + NIX + b + p + e) + disp;
         return objCode;
     }
-
 
     private String hexToBinary(String hex) {
         // Remove any 'x' or 'h' suffix if present
@@ -325,7 +340,10 @@ public class Pass2 {
             pureOperand = pureOperand.substring(1);
         if (pureOperand.endsWith(",X"))
             pureOperand = pureOperand.substring(0, pureOperand.length() - 2);
-        return Pass1.symbolTable.get(pureOperand);
+        String loc =  Pass1.symbolTable.get(pureOperand);
+        if(loc == null)
+            return "Label not found";
+        else return loc;
     }
 
     private String to3DigitHex(int number) {
@@ -333,8 +351,14 @@ public class Pass2 {
         return String.format("%03X", number);
     }
 
-
     private String handleFormat4(Instruction i) {
+        if(i.operand.isEmpty()){
+            return "Invalid Instruction: no operand";
+        }
+
+        if ((i.operand.startsWith("#") || i.operand.startsWith("@")) && i.operand.endsWith(",X")){
+            return "Invalid instruction: cannot be indexed as well as indirect/immediate";
+        }
         char e = '1';
         char p = '0';
         char b = '0';
@@ -357,7 +381,6 @@ public class Pass2 {
             pass2Reader = new Scanner(pass2out);
             htmeWriter = new PrintWriter(htmeFile);
             String H = HRecord(pass2out);
-            System.out.println(H);
             String M = "";
             htmeWriter.println(H);
             for (Instruction i : code) {
@@ -365,12 +388,10 @@ public class Pass2 {
                 if(i.Mnemonic.startsWith("+")){
                     M = MRecord(currentAddress);
                     htmeWriter.println(M);
-                    System.out.println(M);
                 }
             }
             String E = ERecord(pass2out);
             htmeWriter.println(E);
-            System.out.println(E);
         } catch (FileNotFoundException e) {
             System.err.printf("Error opening file '%s'%n", pass2out.getAbsolutePath());
         }
@@ -403,7 +424,6 @@ public class Pass2 {
 
                 // Parse first actual code line
                 String[] parts = line.trim().split("\\s+");
-                System.out.println("First code line parts: " + Arrays.toString(parts));
 
                 if (parts.length >= 3 && parts[1].equals("START")) {
                     name = parts[0];  // Program name is first element
@@ -483,7 +503,6 @@ public class Pass2 {
 
                 // Parse first actual code line
                 String[] parts = line.trim().split("\\s+");
-                System.out.println("First code line parts: " + Arrays.toString(parts));
 
                 if (parts.length >= 3 && parts[1].equals("START")) {
                     startingAddress = Integer.parseInt(parts[2], 16);  // Address is third element

@@ -2,12 +2,14 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.*;
 public class Pass1 {
+
      static String baseAddress = "";
      String baseOperand = "";
      int locCount;
      int startingAddress;
      Instruction instruction = new Instruction();
      public static Map<String,String> symbolTable = new HashMap<>();
+
      public  void locCounter (File intFile){
         File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
         //File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
@@ -107,7 +109,6 @@ public class Pass1 {
                         break;
                     }
                 }
-
                 //assign loc to instr
                 instruction.loc = String.valueOf(locCount);
             }
@@ -126,7 +127,7 @@ public class Pass1 {
         }
     }
 
-    public  void symTable(File out_pass1){
+     public  void symTable(File out_pass1){
         File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
         //File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
 
