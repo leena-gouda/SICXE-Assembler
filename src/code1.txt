@@ -10,10 +10,13 @@
 10           +STA    TOTAL       ; Extended store A at TOTAL (3 words)
 11           RSUB                ; Return from subroutine
 12           COMPR   X,A         ; Compare register X with accumulator A
-13           CLEAR   A           ; Clear accumulator A
-14   EOF     BYTE    C'EOF'      ; Define 3-byte ASCII constant 'EOF'
-15   COUNT   BYTE    X'F1'       ; Define byte-sized hex value F1
-16   TABLE   RESW    2000        ; Reserve 2000 words (6000 bytes) for TABLE
-17   TABLE2  WORD    2000        ; Define word initialized to decimal 2000
-18   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
-19           END     0000        ; End of program, entry point at SUM
+13           COMPR   X,A         ; Compare register X with accumulator A
+14           COMPR   X,A         ; Compare register X with accumulator A
+15           CLEAR   A           ; Clear accumulator A
+16   EOF     BYTE    C'EOF'      ; Define 3-byte ASCII constant 'EOF'
+17   COUNT   BYTE    X'F1'       ; Define byte-sized hex value F1
+18   TABLE   RESW    2000        ; Reserve 2000 words (6000 bytes) for TABLE
+19   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
+20   TABLE2  WORD    2000        ; Define word initialized to decimal 2000
+21   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
+22           END     0000        ; End of program, entry point at SUM

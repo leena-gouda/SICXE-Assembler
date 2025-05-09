@@ -10,10 +10,13 @@ JLT     LOOP
 +STA    TOTAL       
 RSUB                
 COMPR   X,A         
+COMPR   X,A         
+COMPR   X,A         
 CLEAR   A           
 EOF     BYTE    C'EOF'      
 COUNT   BYTE    X'F1'       
 TABLE   RESW    2000        
+TOTAL   WORD    20,10,30    
 TABLE2  WORD    2000        
 TOTAL   WORD    20,10,30    
 END     0000        
