@@ -6,7 +6,7 @@ public class Instruction {
     String opcode;
     int format;
     String Mnemonic;
-    String operand;
+    String operand = null;
     String label;
     String loc;
     String base;
@@ -27,10 +27,6 @@ public class Instruction {
     public static int findFormat (String Mnemonic) {
         if (Mnemonic.startsWith("+"))
             return 4;
-        // remove @ to find inst in list
-        if (Mnemonic.startsWith("@")) {
-            Mnemonic = Mnemonic.substring(1);
-        }
         for (Instruction i : instructions) {
             if (i.Mnemonic.equals(Mnemonic)) {
                 return i.format;
@@ -41,7 +37,7 @@ public class Instruction {
 
     public static String findOpcode (String Mnemonic) {
         // remove to find opcode in list
-        if (Mnemonic.startsWith("+") || Mnemonic.startsWith("@")) {
+        if (Mnemonic.startsWith("+")) {
             Mnemonic = Mnemonic.substring(1);
         }
         for (Instruction i : instructions) {

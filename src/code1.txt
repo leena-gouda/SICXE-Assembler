@@ -1,19 +1,19 @@
-1    SUM       START   0000        ; Program starts at address 0000
-2              FLOAT               ; Convert integer to floating-point (Format 1)
-3              LDA     #0          ; Load immediate value 0 into A
-4              +LDB     #TABLE2    ; Load address of TABLE2 into B (extended format)
-5              BASE    TABLE2      ; Assembler directive for base relative addressing
-6     LOOP     ADD     TABLE,X     ; Add (TABLE + X) to A
-7              ADD     TABLE2,X    ; Add (TABLE2 + X) to A
-8              @TIX     COUNT      ; Test index and increment X, compare with COUNT
-9              JLT     LOOP        ; Jump to LOOP if less than
-10             +STA     TOTAL      ; Store A in TOTAL (extended format)
-11             RSUB                ; Return from subroutine
-12             COMPR   X,A         ; Compare X with A
-13             CLEAR   A           ; Clear register A
-14    EOF      BYTE    C'EOF'      ; ASCII characters 'E', 'O', 'F'
-15    COUNT    BYTE    X'F123'     ; Hex value F123 (2 bytes)
-16    TABLE    RESW    2000        ; Reserve 2000 words (6000 bytes)
-17    TABLE2   WORD    2000        ; Define one word with value 2000
-18    TOTAL    WORD    20,10,30    ; Reserve 3 words for TOTAL
-19             END     SUM         ; End of program
+1    SUM     START   0000        ; Program starts at address 0000
+2            FLOAT               ; Convert accumulator to floating-point (SIC/XE)
+3            LDA     #300        ; Load immediate value 300 into A
+4            +LDB    #TABLE2     ; Extended load: address of TABLE2 into B (Format 4)
+5            BASE    TABLE2      ; Establish base addressing for TABLE2
+6    LOOP    ADD     TABLE,X     ; Add word at (TABLE + X) to A (indexed)
+7            ADD     TABLE2,X    ; Add word at (TABLE2 + X) to A (indexed)
+8            TIX     @COUNT      ; Increment X, compare with indirect COUNT value
+9            JLT     LOOP        ; Jump to LOOP if X < comparison value
+10           +STA    TOTAL       ; Extended store A at TOTAL (3 words)
+11           RSUB                ; Return from subroutine
+12           COMPR   X,A         ; Compare register X with accumulator A
+13           CLEAR   A           ; Clear accumulator A
+14   EOF     BYTE    C'EOF'      ; Define 3-byte ASCII constant 'EOF'
+15   COUNT   BYTE    X'F1'       ; Define byte-sized hex value F1
+16   TABLE   RESW    2000        ; Reserve 2000 words (6000 bytes) for TABLE
+17   TABLE2  WORD    2000        ; Define word initialized to decimal 2000
+18   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
+19           END     SUM         ; End of program, entry point at SUM
