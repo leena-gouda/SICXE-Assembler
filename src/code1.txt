@@ -1,22 +1,46 @@
-1    SUM     START   0000        ; Program starts at address 0000
-2            FLOAT               ; Convert accumulator to floating-point (SIC/XE)
-3            LDA     #300        ; Load immediate value 300 into A
-4            +LDB    #TABLE2     ; Extended load: address of TABLE2 into B (Format 4)
-5            BASE    TABLE2      ; Establish base addressing for TABLE2
-6    LOOP    ADD     TABLE,X     ; Add word at (TABLE + X) to A (indexed)
-7            ADD     TABLE2,X    ; Add word at (TABLE2 + X) to A (indexed)
-8            TIX     @COUNT      ; Increment X, compare with indirect COUNT value
-9            JLT     LOOP        ; Jump to LOOP if X < comparison value
-10           +STA    TOTAL       ; Extended store A at TOTAL (3 words)
-11           RSUB                ; Return from subroutine
-12           COMPR   X,A         ; Compare register X with accumulator A
-13           COMPR   X,A         ; Compare register X with accumulator A
-14           COMPR   X,A         ; Compare register X with accumulator A
-15           CLEAR   A           ; Clear accumulator A
-16   EOF     BYTE    C'EOF'      ; Define 3-byte ASCII constant 'EOF'
-17   COUNT   BYTE    X'F1'       ; Define byte-sized hex value F1
-18   TABLE   RESW    2000        ; Reserve 2000 words (6000 bytes) for TABLE
-19   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
-20   TABLE2  WORD    2000        ; Define word initialized to decimal 2000
-21   TOTAL   WORD    20,10,30    ; Reserve space for 3 words
-22           END     0000        ; End of program, entry point at SUM
+1     COPY     START   0           ; Program starts at address 0
+2     FIRST    STL     RETADR      ; Save return address
+3              LDB     #LENGTH     ; Load immediate value LENGTH into B register
+4              BASE    LENGTH      ; Set base register for addressing
+5     CLOOP    +JSUB   RDREC       ; Jump to subroutine RDREC to read a record
+6              LDA     LENGTH      ; Load LENGTH (number of characters read)
+7              COMP    #0          ; Compare with 0
+8              JEQ     ENDFIL      ; If LENGTH is 0, end of file reached
+9              +JSUB   WREC        ; Jump to subroutine WREC to write a record
+10             J       CLOOP       ; Jump back to CLOOP to continue processing
+11    ENDFIL   LDA     EOF         ; Load EOF character
+12             STA     BUFFER      ; Store EOF into BUFFER
+13             LDA     #3          ; Load immediate 3 (number of EOF chars)
+14             STA     LENGTH      ; Store 3 into LENGTH
+15             +JSUB   WREC        ; Write the EOF message to output
+16             J       @RETADR     ; Jump to return address (indirect)
+17    EOF      BYTE    C'EOF'      ; Constant character string 'EOF'
+18    RETADR   RESW    1           ; Reserve word for return address
+19    LENGTH   RESW    1           ; Reserve word to hold record length
+20    BUFFER   RESB    4096        ; Reserve 4096 bytes for I/O buffer
+21    RDREC    CLEAR   X           ; Clear register X (used as index)
+22             CLEAR   A           ; Clear register A (used for operations)
+23             CLEAR   S           ; Clear register S (used as EOF check)
+24             +LDT    #4096       ; Load 4096 into T (buffer size)
+25    RLOOP    TD      INPUT       ; Test device INPUT for readiness
+26             JEQ     RLOOP       ; If not ready, loop until ready
+27             RD      INPUT       ; Read character from INPUT into A
+28             COMPR   A,S         ; Compare character with S (zero)
+29             JEQ     REXIT       ; If equal, it's end of input
+30             STCH    BUFFER,X    ; Store character in BUFFER at X
+31             TIXR    T           ; Increment X and compare with T
+32             JLT     RLOOP       ; If X < T, continue reading
+33    REXIT    STX     LENGTH      ; Store number of characters read
+34             RSUB                ; Return from subroutine
+35    INPUT    BYTE    X'F1'       ; Device code for input
+36    WREC     CLEAR   X           ; Clear index register X
+37             LDT     LENGTH      ; Load LENGTH into T
+38    WLOOP    TD      OUTPUT      ; Test OUTPUT device for readiness
+39             JEQ     WLOOP       ; If not ready, wait
+40             LDCH    BUFFER,X    ; Load character from BUFFER at X
+41             WD      OUTPUT      ; Write character to OUTPUT
+42             TIXR    T           ; Increment X and compare with T
+43             JLT     WLOOP       ; If X < T, continue writing
+44             RSUB                ; Return from subroutine
+45    OUTPUT   BYTE    X'05'       ; Device code for output
+46             END     FIRST       ; End of program, entry point FIRST

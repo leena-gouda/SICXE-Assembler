@@ -80,15 +80,16 @@ public class Pass1 {
                     locCount += 4;
 
                 else if (line.contains("RESW")){
-                    // Parse the operand as decimal (since assembler directives use decimal numbers)
+                    // parse the operand as decimal (since assembler directives use decimal numbers)
                     int decimalValue = Integer.parseInt(instruction.operand);
-                    // Convert to bytes (RESW = 3 bytes per word)
+                    // convert to bytes (RESW = 3 bytes per word)
                     int bytesToAdvance = decimalValue * 3;
-                    // Advance the location counter (which is stored as hexadecimal internally)
+                    // advance the location counter (which is stored as hexadecimal internally)
                     locCount += bytesToAdvance;
                 }
                 else if (line.contains("RESB")){
-                    locCount += Integer.parseInt(instruction.operand,16);
+                    int decimalValue = Integer.parseInt(instruction.operand);
+                    locCount += decimalValue;
                 }
                 else if (line.contains("WORD")){
                     if (line.contains(",")){
@@ -137,15 +138,15 @@ public class Pass1 {
         try {
             pass1Reader = new Scanner(out_pass1);
             symFileWrite = new PrintWriter(symFile);
+            symFileWrite.printf("%-10s%-10s%n", "Label", "Location");
 
             while (pass1Reader.hasNextLine()){
                 String line = pass1Reader.nextLine();
                 String[] parts = line.split("\\s+");
                 // counter - label - inst - operand
                 if (parts.length == 4){
-                    // counter & label
-                    symFileWrite.println(parts[0] + "\t" + parts[1]);
-
+                    // label & counter
+                    symFileWrite.printf( "%-10s%-10s%n", parts[1], parts[0]);
                     symbolTable.put(parts[1], parts[0]);
                 }
                 // .contains in case of #
