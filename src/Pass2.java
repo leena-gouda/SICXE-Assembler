@@ -17,14 +17,13 @@ public class Pass2 {
 
 
     public void openFiles(){
-        //File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
-        //File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
-        File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
-        File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
+        File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
+        //File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
+        //File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
 
         handleCode(pass1_out, pass2_out);
     }
-
 
     private void handleCode(File pass1_out, File pass2_out){
 
@@ -35,9 +34,9 @@ public class Pass2 {
             pass1Scan = new Scanner(pass1_out);
             pass2Write = new PrintWriter(pass2_out);
 
-            pass2Write.println("loc\t\tlabel\t\tinstr\t\toperand\t\tobj code");
+            pass2Write.println("loc\t\tlabel\t\tinstr\t\toperand\t\t\tobj code");
 
-            Instruction i = null;
+            Instruction i;
             while (pass1Scan.hasNextLine()) {
 
                 i = new Instruction();
@@ -90,8 +89,6 @@ public class Pass2 {
                 // go to generateObjCode method
                 objCode = generateObjCode(instr);
 
-                //System.out.println(instr.Mnemonic + " " + objCode);
-
                 // write in file
                 if (instr.label == null) {
                     instr.label = "";
@@ -111,18 +108,17 @@ public class Pass2 {
                 String label = instr.label != null ? instr.label : "";
                 String mnemonic = instr.Mnemonic != null ? instr.Mnemonic : "";
                 String operand = instr.operand != null ? instr.operand : "";
-                // Special handling for directives
+                // special handling for directives
                 if (mnemonic.equals("BASE")) {
                     pass2Write.printf("%-8s%-16s%-8s%-16s%n", "", "", "BASE", operand);
                     continue;
                 }
-                // Format with tabs and fixed spacing
+                // format with tabs and fixed spacing
                 pass2Write.printf("%-8s%-16s%-8s%-16s%-8s%n", loc, label, mnemonic, operand, objCode);
             }
         }
         catch(Exception e){
             e.printStackTrace();
-            //System.out.println(e + "here");
         }
       finally {
             if (pass1Scan != null) {
@@ -131,22 +127,23 @@ public class Pass2 {
             if (pass2Write != null) {
                 pass2Write.close();
             }
-            for (String objCode : objectCodes) {
-                System.out.println(objCode);
-            }
+
             HTMERecords(pass2_out);
         }
     }
 
-
     private String generateObjCode(Instruction i){
         // no obj code for these directives
-        if (i.Mnemonic.equals("START") || i.Mnemonic.equals("END") || i.Mnemonic.equals("BASE")
+        if (i.Mnemonic.equals("START") || i.Mnemonic.equals("END")
                 || i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")) {
             return " ";
-        } else if (i.Mnemonic.equals("BYTE")) {
+        }
+        else if (i.Mnemonic.equals("BASE"))
+            return "";
+        else if (i.Mnemonic.equals("BYTE")) {
             return handleByteDirective(i.operand);
-        } else if (i.Mnemonic.equals("WORD")) {
+        }
+        else if (i.Mnemonic.equals("WORD")) {
             // if there is more than 1 word
             if (i.operand.contains(",")) {
                 // seperate at ,
@@ -167,7 +164,7 @@ public class Pass2 {
                 case 2 -> handleFormat2(i);
                 case 3 -> handleFormat3(i);
                 case 4 -> handleFormat4(i);
-                default -> "";
+                default -> "Invalid Instruction: format not found";
             };
         }
     }
@@ -193,12 +190,13 @@ public class Pass2 {
     }
 
     private String handleWordDirective(String operand) {
+        if (operand == null)
+            return "Operand is null";
         // converts string to int
         int value = Integer.parseInt(operand);
         // formats int into hex string
         return String.format("%06X", value);
     }
-
 
     private String handleFormat2(Instruction i){
         // split operand at ,
@@ -226,14 +224,24 @@ public class Pass2 {
         char e = '0';
         char p = '0';
         char b = '0';
+
         if (i.Mnemonic.equals("RSUB")){
             return "4F0000";
+        }
+
+        if(i.operand.isEmpty()){
+            return "Invalid Instruction: no operand";
+        }
+
+        if ((i.operand.startsWith("#") || i.operand.startsWith("@")) && i.operand.endsWith(",X")){
+            return "Invalid instruction: cannot be indexed as well as indirect/immediate";
         }
 
         String opcode = handleOpCode(i);
 
         String NIX = setNIX(i);
 
+        // if immediate, check if operand is a number. if yes, convert to hex and place in obj code
         if (NIX.equals("010")){
             String immOp = i.operand.substring(1);
             if (immOp.matches("\\d+")) {
@@ -248,21 +256,22 @@ public class Pass2 {
             p = '1';
         }
         else b = '1';
+
+        // to remove first character (p/b)
         String disp = addMode.substring(1);
         objCode = binaryToHex(opcode + NIX + b + p + e) + disp;
         return objCode;
     }
 
-
     private String hexToBinary(String hex) {
-        // Remove any 'x' or 'h' suffix if present
+        // remove any 'x' or 'h' suffix if present
         hex = hex.replaceAll("[xXhH]", "");
-        // Convert to binary with leading zeros
+        // convert to binary with leading zeros
         return String.format("%8s", Integer.toBinaryString(Integer.parseInt(hex, 16))).replace(' ', '0');
     }
 
     private String binaryToHex(String binary) {
-        // Parse binary (12 bits) and format as 3 uppercase hex digits
+        // parse binary (12 bits) and format as 3 uppercase hex digits
         int decimal = Integer.parseInt(binary, 2);
         return String.format("%03X", decimal);
     }
@@ -293,21 +302,25 @@ public class Pass2 {
 
     private String setPB (Instruction inst){
         String flagPlusDisp = "";
+        // get index of instruction
         int j = Pass2.code.indexOf(inst);
 
+        // if next instructions isn't BASE, load into PC the location of the next instruction
         if (!Pass2.code.get(j + 1).Mnemonic.equals("BASE"))
             PC = Pass2.code.get(j + 1).loc;
+        // otherwise, the location of the instruction after the BASE directive
         else PC = Pass2.code.get(j + 2).loc;
         int PCInt = Integer.parseInt(PC, 16);
-
 
         String TA = getTA(inst.operand);
         int TAInt = Integer.parseInt(TA, 16);
 
+        // calculate displacement, if within range of PC relative, set p = 1
         int displacement = TAInt - PCInt;
         if (displacement >= -2048 && displacement <= 2047) {
             flagPlusDisp = "p";
         }
+        // otherwise, calculate displacement with respect to base and if within range, set b = 1
         else {
             int base  = Integer.parseInt(Pass1.baseAddress, 16);
             displacement = TAInt - base;
@@ -315,19 +328,26 @@ public class Pass2 {
                 flagPlusDisp = "b";
             }
         }
-                
-        //String hexDisp = Integer.toHexString(displacement).toUpperCase();
+
+        // return string containing flag (p/b) and displacement
         flagPlusDisp += to3DigitHex(displacement);
         return flagPlusDisp;
     }
 
     private String getTA (String label){
         String pureOperand = label;
+        // if it starts with # or @, remove to search for label in symbol table
         if (pureOperand.startsWith("#") || pureOperand.startsWith("@"))
             pureOperand = pureOperand.substring(1);
+
+        // same idea for ,X
         if (pureOperand.endsWith(",X"))
             pureOperand = pureOperand.substring(0, pureOperand.length() - 2);
-        return Pass1.symbolTable.get(pureOperand);
+        String loc =  Pass1.symbolTable.get(pureOperand);
+
+        if(loc == null)
+            return "Label not found";
+        else return loc;
     }
 
     private String to3DigitHex(int number) {
@@ -335,46 +355,60 @@ public class Pass2 {
         return String.format("%03X", number);
     }
 
+    private String to5DigitHex(int number) {
+        number &= 0xFFFFF;
+        return String.format("%05X", number);
+    }
+
     private String handleFormat4(Instruction i) {
+        if(i.operand.isEmpty()){
+            return "Invalid Instruction: no operand";
+        }
+
+        if ((i.operand.startsWith("#") || i.operand.startsWith("@")) && i.operand.endsWith(",X")){
+            return "Invalid instruction: cannot be indexed as well as indirect/immediate";
+        }
         char e = '1';
         char p = '0';
         char b = '0';
         String NIX = setNIX(i);
-        String address = getTA(i.operand);
         String opcode = handleOpCode(i);
+
+        if ((NIX.equals("010") || NIX.equals("100")) && i.operand.substring(1).matches("\\d+")){
+            return binaryToHex(opcode + NIX + b + p + e) + to5DigitHex(Integer.parseInt(i.operand.substring(1)));
+        }
+
+        String address = getTA(i.operand);
+
         if (address != null) {
-            return binaryToHex(opcode + NIX + b + p + e) + "0" + address;
+            return binaryToHex(opcode + NIX + b + p + e) + to5DigitHex(Integer.parseInt(address, 16));
         } else {
             return "label not found in symbol table";
         }
     }
 
-    public void HTMERecords(File pass2out) {
-        File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
-        //File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
+    private void HTMERecords(File pass2out) {
+        //File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
+        File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
         Scanner pass2Reader = null;
         PrintWriter htmeWriter = null;
         try {
             pass2Reader = new Scanner(pass2out);
             htmeWriter = new PrintWriter(htmeFile);
             String H = HRecord(pass2out);
-            System.out.println(H);
             htmeWriter.println(H);
             String T = TRecord(pass2out);
-            System.out.println(T);
             htmeWriter.print(T);
             String M = "";
             for (Instruction i : code) {
                 String currentAddress = i.loc;
-                if(i.Mnemonic.startsWith("+")){
+                if(i.Mnemonic.startsWith("+") && !i.operand.startsWith("#")){
                     M = MRecord(currentAddress);
                     htmeWriter.println(M);
-                    System.out.println(M);
                 }
             }
             String E = ERecord(pass2out);
             htmeWriter.println(E);
-            System.out.println(E);
         } catch (FileNotFoundException e) {
             System.err.printf("Error opening file '%s'%n", pass2out.getAbsolutePath());
         }
@@ -388,7 +422,7 @@ public class Pass2 {
         }
     }
 
-    public int StartingAddress(File pass2out) {
+    private int StartingAddress(File pass2out) {
         Scanner pass2Reader = null;
         try {
             int startAddress = 0;
@@ -415,7 +449,7 @@ public class Pass2 {
         }
     }
 
-    public String HRecord(File pass2Out) {
+    private String HRecord(File pass2Out) {
         Scanner pass2Reader = null;
         try {
             pass2Reader = new Scanner(pass2Out);
@@ -434,7 +468,6 @@ public class Pass2 {
 
                 // Parse first actual code line
                 String[] parts = line.trim().split("\\s+");
-                System.out.println("First code line parts: " + Arrays.toString(parts));
 
                 if (parts.length >= 3 && parts[1].equals("START")) {
                     name = parts[0];  // Program name is first element
@@ -480,7 +513,7 @@ public class Pass2 {
         }
     }
 
-    public String TRecord(File pass2out) {
+    private String TRecord(File pass2out) {
         StringBuilder finalRecord = new StringBuilder();
         int currentAddress = StartingAddress(pass2out);
         List<String> objcodes = new ArrayList<>();
@@ -529,8 +562,6 @@ public class Pass2 {
         return finalRecord.toString();
     }
 
-
-
     private String buildTRecord(int startAddress, List<String> objcodes) {
         int totalBytes = 0;
         StringBuilder mergedCodes = new StringBuilder(); // Stores all objcodes
@@ -541,20 +572,23 @@ public class Pass2 {
         return String.format("T%06X%02X%s%n", startAddress, totalBytes, mergedCodes);
     }
 
-    public String MRecord(String currentAddress) {
+    private String MRecord(String currentAddress) {
         int address = Integer.parseInt(currentAddress,16) + 1;
         double halfByte = 20/(8 * 0.5);
         int hb = (int) halfByte;
         return  "M" + String.format("%06X", address) +String.format("%02X", hb);
     }
 
-    public String ERecord(File pass2out) {
+    private String ERecord(File pass2out) {
             int startAddress = StartingAddress(pass2out);
             return "E" + String.format("%06X", startAddress);
     }
 
     private String handleOpCode(Instruction i) {
+        // convert hexadecimal opcode to binary
         String opcode = hexToBinary(i.opcode);
+
+        // remove last two bits of opcode
         opcode = opcode.substring(0, opcode.length() - 2);
 
         return opcode;
