@@ -20,6 +20,7 @@ LENGTH  BYTE    X'FF'
 +JSUB   FARSUB             
 LDL     =X'F1B2C3'         
 FARSUB  +STA    FARVAR             
+LTORG
 RSUB                      
 FARVAR  RESW    1                  
 END     0000               

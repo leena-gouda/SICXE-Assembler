@@ -2,27 +2,25 @@ loc		label		instr		operand			obj code
         PROGA           START   0000                    
 0000                    +LDA    =C'A'           03100016
 0004                    LDB     #RESULT         692021  
-                        BASE    RESULT          
 0007                    +ADD    WOD             1B100017
 000B                    +LDT    #512            75100200
 000F                    TIO                     F8      
 0010                    MULR    A,X             9801    
 0012                    +J      @RETADRR        3E10002B
-                        LTORG                           
 0016                    =C'A'                   41      
 0017    WOD             WORD    5               000005  
 001A    GAMMA           BYTE    X'02'           02      
 001B    DATA            WORD    5               000005  
-001E    BUFFER          RESB    10               001E 10
-0028    RESULT          RESW    1                0028 1 
-002B    RETADRR         RESB    4096             002B 4096
+001E    BUFFER          RESB    10                      
+0028    RESULT          RESW    1                       
+002B    RETADRR         RESB    4096                    
 102B    LENGTH          BYTE    X'FF'           FF      
 102C                    +LDS    #1000           6D1003E8
 1030                    +STT    DATA            8710001B
 1034                    +JSUB   FARSUB          4B10103B
-1038                    LDL     =X'F1B2C3'      0B200A  
-103B    FARSUB          +STA    FARVAR          0F101042
-103F                    RSUB                    4F0000  
-1042    FARVAR          RESW    1                1042 1 
-1045                    =X'F1B2C3'                F1B2C3  
+1038                    LDL     =X'F1B2C3'      0B2004  
+103B    FARSUB          +STA    FARVAR          0F101045
+103F                    =X'F1B2C3'                F1B2C3  
+1042                    RSUB                    4F0000  
+1045    FARVAR          RESW    1                       
 1048                    END                             

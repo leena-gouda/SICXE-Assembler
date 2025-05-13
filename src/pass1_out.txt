@@ -21,7 +21,8 @@ PROGA   START   0000
 1034	+JSUB   FARSUB             
 1038	LDL     =X'F1B2C3'         
 103B	FARSUB  +STA    FARVAR             
-103F	RSUB                      
-1042	FARVAR  RESW    1                  
-1045	=X'F1B2C3'
+		LTORG
+103F	=X'F1B2C3'
+1042	RSUB                      
+1045	FARVAR  RESW    1                  
 1048	END

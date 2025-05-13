@@ -85,7 +85,7 @@ public class Pass2 {
                 i.opcode = Instruction.findOpcode(i.Mnemonic);
 
                 // add each instr obj to code
-                if(!i.Mnemonic.equals("BASE")){
+                if(!i.Mnemonic.equals("BASE") && !i.Mnemonic.equals("LTORG")){
                     Pass2.code.add(i);
                 }
 
@@ -145,7 +145,7 @@ public class Pass2 {
                 || i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")) {
             return " ";
         }
-        else if (i.Mnemonic.equals("BASE"))
+        else if (i.Mnemonic.equals("BASE") || i.Mnemonic.equals("LTORG"))
             return "";
         else if (i.Mnemonic.equals("BYTE")) {
             return handleByteDirective(i.operand);
@@ -618,11 +618,14 @@ public class Pass2 {
                 objcodes.add(i.objCode); //put current obj code in list
                 length = byteSize;    // length contains the number of bytes
                 currentAddress = Integer.parseInt(code.get(j + 1).loc, 16); //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
+                System.out.println(currentAddress + "inside");
             }
             else {//if theres no special cases
                 objcodes.add(i.objCode);
                 length += byteSize;
                 currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
+                System.out.println(currentAddress + "out");
+
             }
         }
 
