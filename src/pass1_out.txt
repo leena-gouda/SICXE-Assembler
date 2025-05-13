@@ -1,46 +1,25 @@
-COPY     START   0           
-0000	FIRST    STL     RETADR      
-0003	LDB     #LENGTH     
-		BASE    LENGTH      
-0006	CLOOP    +JSUB   RDREC       
-000A	LDA     LENGTH      
-000D	COMP    #0          
-0010	JEQ     ENDFIL      
-0013	+JSUB   WREC        
-0017	J       CLOOP       
-001A	ENDFIL   LDA     EOF         
-001D	STA     BUFFER      
-0020	LDA     #3          
-0023	STA     LENGTH      
-0026	+JSUB   WREC        
-002A	J       @RETADR     
-002D	EOF      BYTE    C'EOF'      
-0030	RETADR   RESW    1           
-0033	LENGTH   RESW    1           
-0036	BUFFER   RESB    4096        
-1036	RDREC    CLEAR   X           
-1038	CLEAR   A           
-103A	CLEAR   S           
-103C	+LDT    #4096       
-1040	RLOOP    TD      INPUT       
-1043	JEQ     RLOOP       
-1046	RD      INPUT       
-1049	COMPR   A,S         
-104B	JEQ     REXIT       
-104E	STCH    BUFFER,X    
-1051	TIXR    T           
-1053	JLT     RLOOP       
-1056	REXIT    STX     LENGTH      
-1059	RSUB                
-105C	INPUT    BYTE    X'F1'       
-105D	WREC     CLEAR   X           
-105F	LDT     LENGTH      
-1062	WLOOP    TD      OUTPUT      
-1065	JEQ     WLOOP       
-1068	LDCH    BUFFER,X    
-106B	WD      OUTPUT      
-106E	TIXR    T           
-1070	JLT     WLOOP       
-1073	RSUB                
-1076	OUTPUT   BYTE    X'05'       
-1077	END     FIRST       
+PROGA   START   0000                
+0000	+LDA    =C'A'              
+0004	LDB     #RESULT            
+		BASE    RESULT             
+0007	+ADD    WOD                
+000B	+LDT    #512               
+000F	TIO                        
+0010	MULR    A,X                
+0012	+J      @RETADRR           
+0016	LTORG                      
+0016	WOD     WORD    5                  
+0019	GAMMA   BYTE    X'02'              
+001A	DATA    WORD    5                  
+001D	BUFFER  RESB    10                 
+0027	RESULT  RESW    1             
+002A	RETADRR RESB    4096                   
+102A	LENGTH  BYTE    X'FF'              
+102B	+LDS    #1000              
+102F	+STT    DATA               
+1033	+JSUB   FARSUB             
+1037	LDL     =X'F1B2C3'         
+103A	FARSUB  +STA    FARVAR             
+103E	RSUB                      
+1041	FARVAR  RESW    1                  
+1044	END     0000               

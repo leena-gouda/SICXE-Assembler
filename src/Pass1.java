@@ -11,7 +11,7 @@ public class Pass1 {
      public static Map<String,String> symbolTable = new HashMap<>();
 
      public  void locCounter (File intFile){
-        File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        File out_pass1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass1_out.txt");
         //File out_pass1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         Scanner intFileReader = null;
         PrintWriter pass1Write = null;
@@ -129,7 +129,7 @@ public class Pass1 {
     }
 
      public  void symTable(File out_pass1){
-        File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\symTable.txt");
+        File symFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\symTable.txt");
         //File symFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\symTable.txt");
 
         Scanner pass1Reader = null;

@@ -1,3 +1,4 @@
+import javax.swing.plaf.ColorUIResource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -17,8 +18,8 @@ public class Pass2 {
 
 
     public void openFiles(){
-        File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
-        File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
+        File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass1_out.txt");
+        File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass2_out.txt");
         //File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
         //File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
 
@@ -81,7 +82,10 @@ public class Pass2 {
                 i.opcode = Instruction.findOpcode(i.Mnemonic);
 
                 // add each instr obj to code
-                Pass2.code.add(i);
+                if(!i.Mnemonic.equals("BASE")){
+                    Pass2.code.add(i);
+                }
+
 
             }
 
@@ -99,10 +103,10 @@ public class Pass2 {
                 if (instr.operand == null) {
                     instr.operand = "";
                 }
-                if (!objCode.isEmpty()) {
+
                     objectCodes.add(objCode);
                     instr.objCode = objCode;
-                }
+
 
                 String loc = instr.loc != null ? instr.loc : "";
                 String label = instr.label != null ? instr.label : "";
@@ -389,7 +393,7 @@ public class Pass2 {
 
     private void HTMERecords(File pass2out) {
         //File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
-        File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
+        File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\HTME.txt");
         Scanner pass2Reader = null;
         PrintWriter htmeWriter = null;
         try {
@@ -517,12 +521,24 @@ public class Pass2 {
         StringBuilder finalRecord = new StringBuilder();
         int currentAddress = StartingAddress(pass2out);
         List<String> objcodes = new ArrayList<>();
+
         int length = 0;
-        for (String objCode : objectCodes) {
-            int byteSize = objCode.length() / 2; // 2 chars = 1 byte
+
+        for (Instruction i  : code) {
+
+            if(i.Mnemonic.equals("END"))
+                continue;
+
+            int j = Pass2.code.indexOf(i);
+            int byteSize;
+
+            if(!i.objCode.isEmpty() && !i.objCode.equals(" ")) {
+                byteSize = i.objCode.length() / 2; // 2 chars = 1 byte
+            }
+            else byteSize = 0;
 
             // space means RESB or RESW so start a new t
-            if (objCode.contains(" ")) {
+            if (i.objCode.equals(" ")) {
                 //if there is previous objcodes in list print them
                 if (!objcodes.isEmpty()) {
                     finalRecord.append(buildTRecord(currentAddress - length , objcodes)); // currentAddress - length means the starting address of t
@@ -530,7 +546,7 @@ public class Pass2 {
                     length = 0; //same for length
                 }
                 // Skip RESB or RESW but go to next address
-                currentAddress += byteSize;
+                currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
                 continue;
             }
 
@@ -543,14 +559,14 @@ public class Pass2 {
                     length = 0;//same for length
                 }
                 // Start new record with current objCode
-                objcodes.add(objCode); //put current obj code in list
+                objcodes.add(i.objCode); //put current obj code in list
                 length = byteSize;    // length contains the number of bytes
-                currentAddress += byteSize; //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
+                currentAddress = Integer.parseInt(code.get(j + 1).loc, 16); //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
             }
             else {//if theres no special cases
-                objcodes.add(objCode);
+                objcodes.add(i.objCode);
                 length += byteSize;
-                currentAddress += byteSize;
+                currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
             }
         }
 
