@@ -20,6 +20,7 @@
 24                  +JSUB   FARSUB             ; EXTENDED: CALL FAR SUBROUTINE
 25                  LDL     =X'F1B2C3'         ;literal
 26          FARSUB  +STA    FARVAR             ; EXTENDED SUBROUTINE: STORE A
+28                  LTORG
 27                  RSUB                      ; EXTENDED RETURN
 29          FARVAR  RESW    1                  ; VARIABLE IN FAR MEMORY
 31                  END     0000               ; END OF PROGRAM
