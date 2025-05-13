@@ -3,8 +3,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-import java.util.*;
 
 
 public class Pass2 {
@@ -14,13 +14,15 @@ public class Pass2 {
     String objCode;
     String PC;
     public Pass2() { }
+    private Map<String,String> literalAddresses;
+    private Map<String,Integer> literalSizes;
 
 
     public void openFiles(){
-        File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
-        File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
-        //File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
-        //File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
+        //File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
+        //File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
+        File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
+        File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
 
         handleCode(pass1_out, pass2_out);
     }
@@ -29,6 +31,8 @@ public class Pass2 {
 
         Scanner pass1Scan = null;
         PrintWriter pass2Write = null;
+        literalAddresses = Pass1.literalAddresses;
+        literalSizes = Pass1.literalSizes;
 
         try {
             pass1Scan = new Scanner(pass1_out);
@@ -127,18 +131,22 @@ public class Pass2 {
             if (pass2Write != null) {
                 pass2Write.close();
             }
-
+            for(String oc : objectCodes){
+                System.out.println(oc);
+            }
+//            getNextAddressAfterReserves();
             HTMERecords(pass2_out);
         }
     }
 
     private String generateObjCode(Instruction i){
         // no obj code for these directives
-        if (i.Mnemonic.equals("START") || i.Mnemonic.equals("END")
-                || i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")) {
-            return " ";
-        }
-        else if (i.Mnemonic.equals("BASE"))
+        if (i.Mnemonic.equals("START") || i.Mnemonic.equals("END")) {
+            return "";
+        } else if (i.Mnemonic.equals("RESW") || i.Mnemonic.equals("RESB")) {
+            return " " + i.loc + " " + i.operand;
+            //return " ";
+        } else if (i.Mnemonic.equals("BASE") || i.Mnemonic.equals("LTORG"))
             return "";
         else if (i.Mnemonic.equals("BYTE")) {
             return handleByteDirective(i.operand);
@@ -156,6 +164,10 @@ public class Pass2 {
                 return objCode.toString();
             }
             return handleWordDirective(i.operand);
+        }else if(i.operand != null && i.operand.startsWith("=")){
+            return handleLiteralOperand(i);
+        }else if(i.Mnemonic.startsWith("=")){
+            return handleByteDirective(i.Mnemonic);
         }
         // if regular instruction
         else {
@@ -169,10 +181,41 @@ public class Pass2 {
         }
     }
 
+    private String handleLiteralOperand(Instruction i) {
+        String literal = i.operand.substring(1); // Remove '='
+
+        // Check if literal exists
+        if (!literalAddresses.containsKey(literal)) {
+            return "UNDEFINED LITERAL";
+        }
+        // Handle different instruction formats
+        switch (i.format) {
+            case 3: return handleFormat3(i);
+            case 4: return handleFormat4(i);
+            default: return "INVALID FORMAT FOR LITERAL";
+        }
+    }
+
     private String handleByteDirective(String operand) {
-        // remove X or C prefix
+        String result = "";
         String pureOperand = operand.substring(2, operand.length() - 1);
-        if (operand.startsWith("C")) {
+        if (operand.startsWith("=C'")) {
+            // Extract the string inside quotes
+            String str = operand.substring(3, operand.length() - 1);
+            StringBuilder objcode = new StringBuilder();
+            for (Byte b : str.getBytes()) {
+                String hex = Integer.toHexString(b & 0xFF).toUpperCase();
+                if (hex.length() == 1) {
+                    objcode.append('0');
+                }
+                objcode.append(hex);
+            }
+            result = objcode.toString();
+        } else if (operand.startsWith("=X'")) {
+            // Extract hex string directly
+            result = operand.substring(3, operand.length() - 1).toUpperCase();
+        }// remove X or C prefix
+        else if (operand.startsWith("C")) {
             StringBuilder objCode = new StringBuilder();
             // converts string to byte array and loops through it
             for (byte b : pureOperand.getBytes()) {
@@ -185,8 +228,10 @@ public class Pass2 {
                 objCode.append(hex);
             }
             return objCode.toString();
+        }else{
+                result = pureOperand; // fallback if needed
         }
-        return pureOperand;
+        return result;
     }
 
     private String handleWordDirective(String operand) {
@@ -221,6 +266,7 @@ public class Pass2 {
     }
 
     private String handleFormat3(Instruction i){
+        String lit = "";
         char e = '0';
         char p = '0';
         char b = '0';
@@ -313,7 +359,12 @@ public class Pass2 {
         int PCInt = Integer.parseInt(PC, 16);
 
         String TA = getTA(inst.operand);
-        int TAInt = Integer.parseInt(TA, 16);
+        if (TA == null || !TA.matches("[0-9A-Fa-f]+")) {
+            // Handle case where operand is unresolved or invalid
+            System.err.println("Invalid target address for operand: " + inst.operand);
+            return "Invalid Target Address";
+        }
+            int TAInt = Integer.parseInt(TA, 16);
 
         // calculate displacement, if within range of PC relative, set p = 1
         int displacement = TAInt - PCInt;
@@ -336,6 +387,10 @@ public class Pass2 {
 
     private String getTA (String label){
         String pureOperand = label;
+        if(label.startsWith("=")){
+            String literal = label.substring(1);
+            return literalAddresses.getOrDefault(literal, null);
+        }
         // if it starts with # or @, remove to search for label in symbol table
         if (pureOperand.startsWith("#") || pureOperand.startsWith("@"))
             pureOperand = pureOperand.substring(1);
@@ -343,6 +398,7 @@ public class Pass2 {
         // same idea for ,X
         if (pureOperand.endsWith(",X"))
             pureOperand = pureOperand.substring(0, pureOperand.length() - 2);
+
         String loc =  Pass1.symbolTable.get(pureOperand);
 
         if(loc == null)
@@ -361,7 +417,7 @@ public class Pass2 {
     }
 
     private String handleFormat4(Instruction i) {
-        if(i.operand.isEmpty()){
+        if(i.operand == null || i.operand.isEmpty()){
             return "Invalid Instruction: no operand";
         }
 
@@ -388,8 +444,8 @@ public class Pass2 {
     }
 
     private void HTMERecords(File pass2out) {
-        //File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
-        File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
+        File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
+        //File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
         Scanner pass2Reader = null;
         PrintWriter htmeWriter = null;
         try {
@@ -401,6 +457,11 @@ public class Pass2 {
             htmeWriter.print(T);
             String M = "";
             for (Instruction i : code) {
+                if (i.operand != null && i.operand.startsWith("=")) {
+                    System.out.println("Skipping instruction with literal operand: " + i);
+                } else if (i.operand == null) {
+                    System.err.println("Skipping instruction with null operand: " + i);
+                }
                 String currentAddress = i.loc;
                 if(i.Mnemonic.startsWith("+") && !i.operand.startsWith("#")){
                     M = MRecord(currentAddress);
@@ -448,6 +509,23 @@ public class Pass2 {
             return 0;
         }
     }
+
+    private int getNextAddressAfterReserves() {
+        Scanner pass2Reader = null;
+        try {
+            int Address = 0;
+            for(String oc : objectCodes){
+                if(oc.contains(" ")){
+                    Address += Integer.parseInt(oc,16);
+                    System.out.println("xxx" +oc + String.valueOf(Address));
+                }
+            }
+            return Address;
+        }catch (Exception e){
+            return 0;
+        }
+    }
+
 
     private String HRecord(File pass2Out) {
         Scanner pass2Reader = null;
@@ -518,19 +596,20 @@ public class Pass2 {
         int currentAddress = StartingAddress(pass2out);
         List<String> objcodes = new ArrayList<>();
         int length = 0;
+        int tRecordStartAddress = currentAddress; // Holds the start address of current T record
         for (String objCode : objectCodes) {
             int byteSize = objCode.length() / 2; // 2 chars = 1 byte
-
             // space means RESB or RESW so start a new t
-            if (objCode.contains(" ")) {
+            if (objCode.startsWith(" ")) {
+                //tRecordStartAddress = getNextAddressAfterReserves();
                 //if there is previous objcodes in list print them
                 if (!objcodes.isEmpty()) {
-                    finalRecord.append(buildTRecord(currentAddress - length , objcodes)); // currentAddress - length means the starting address of t
+                    finalRecord.append(buildTRecord(tRecordStartAddress, objcodes)); // currentAddress - length means the starting address of t
                     objcodes.clear(); //remove the objcodes from list to not repeat them when we start a new t
                     length = 0; //same for length
                 }
-                // Skip RESB or RESW but go to next address
-                currentAddress += byteSize;
+                currentAddress+=byteSize;
+                tRecordStartAddress = currentAddress;
                 continue;
             }
 
@@ -538,28 +617,61 @@ public class Pass2 {
             if (length + byteSize > 0x1E) {
                 //if there is previous objcodes in list print them
                 if (!objcodes.isEmpty()) {
-                    finalRecord.append(buildTRecord(currentAddress - length , objcodes)); // currentAddress - length means the starting address of t
+                    finalRecord.append(buildTRecord(tRecordStartAddress, objcodes)); // currentAddress - length means the starting address of t
                     objcodes.clear();//remove the objcodes from list to not repeat them when we start a new t
-                    length = 0;//same for length
+                    length = 0;
                 }
-                // Start new record with current objCode
-                objcodes.add(objCode); //put current obj code in list
-                length = byteSize;    // length contains the number of bytes
-                currentAddress += byteSize; //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
+                tRecordStartAddress = currentAddress;
+                // set the start address for the new record
+//                objcodes.add(objCode);
+//                length = byteSize;    // length contains the number of bytes
+                //currentAddress += byteSize; //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
+            } //if theres no special cases
+
+
+            if (objcodes.isEmpty()) {
+                // set start address only at first code
+                tRecordStartAddress = currentAddress;
             }
-            else {//if theres no special cases
-                objcodes.add(objCode);
-                length += byteSize;
-                currentAddress += byteSize;
-            }
+            objcodes.add(objCode);
+            length += byteSize;
+            currentAddress += byteSize;
+
         }
 
-        // add the remaining objcodes
-        if (!objcodes.isEmpty()) {
-            finalRecord.append(buildTRecord(currentAddress - length , objcodes));
-        }
+//        if (!literalAddresses.isEmpty()) {
+//            List<String> literalCodes = new ArrayList<>();
+//            int literalStart = Integer.MAX_VALUE;
+//            int literalLength = 0;
+//
+//        for (String address : literalAddresses.values()) {
+//            int addr = Integer.parseInt(address, 16);
+//            if (addr < literalStart) {
+//                literalStart = addr;
+//            }
+//        }
+//            // Generate object code for literals in address order
+//            literalAddresses.entrySet().stream()
+//                    .sorted(Map.Entry.comparingByValue())
+//                    .forEach(entry -> {
+//                        String literal = entry.getKey();
+//                        String objCode = convertLiteralToObjectCode(literal);
+//                        literalCodes.add(objCode);
+//                    });
+//            // Calculate total size
+//            literalLength = literalCodes.stream()
+//                    .mapToInt(code -> code.length() / 2)
+//                    .sum();
+//
+//            finalRecord.append(buildTRecord(literalStart, literalCodes));
+//        }
 
-        return finalRecord.toString();
+            // add the remaining objcodes
+            if (!objcodes.isEmpty()) {
+                finalRecord.append(buildTRecord(tRecordStartAddress, objcodes));
+            }
+            System.out.println(finalRecord.toString());
+            return finalRecord.toString();
     }
 
     private String buildTRecord(int startAddress, List<String> objcodes) {

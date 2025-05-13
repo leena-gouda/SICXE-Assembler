@@ -1,0 +1,3 @@
+Name           Size      Address   
+=C'A'          1         0016      
+=X'F1B2C3'     3         1045      

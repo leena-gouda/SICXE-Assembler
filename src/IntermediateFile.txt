@@ -1,46 +1,25 @@
-COPY     START   0           
-FIRST    STL     RETADR      
-LDB     #LENGTH     
-BASE    LENGTH      
-CLOOP    +JSUB   RDREC       
-LDA     LENGTH      
-COMP    #0          
-JEQ     ENDFIL      
-+JSUB   WREC        
-J       CLOOP       
-ENDFIL   LDA     EOF         
-STA     BUFFER      
-LDA     #3          
-STA     LENGTH      
-+JSUB   WREC        
-J       @RETADR     
-EOF      BYTE    C'EOF'      
-RETADR   RESW    1           
-LENGTH   RESW    1           
-BUFFER   RESB    4096        
-RDREC    CLEAR   X           
-CLEAR   A           
-CLEAR   S           
-+LDT    #4096       
-RLOOP    TD      INPUT       
-JEQ     RLOOP       
-RD      INPUT       
-COMPR   A,S         
-JEQ     REXIT       
-STCH    BUFFER,X    
-TIXR    T           
-JLT     RLOOP       
-REXIT    STX     LENGTH      
-RSUB                
-INPUT    BYTE    X'F1'       
-WREC     CLEAR   X           
-LDT     LENGTH      
-WLOOP    TD      OUTPUT      
-JEQ     WLOOP       
-LDCH    BUFFER,X    
-WD      OUTPUT      
-TIXR    T           
-JLT     WLOOP       
-RSUB                
-OUTPUT   BYTE    X'05'       
-END     FIRST       
+PROGA   START   0000                
++LDA    =C'A'              
+LDB     #RESULT            
+BASE    RESULT             
++ADD    WOD                
++LDT    #512               
+TIO                        
+MULR    A,X                
++J      @RETADRR           
+LTORG                      
+WOD     WORD    5                  
+GAMMA   BYTE    X'02'              
+DATA    WORD    5                  
+BUFFER  RESB    10                 
+RESULT  RESW    1             
+RETADRR RESB    4096                   
+LENGTH  BYTE    X'FF'              
++LDS    #1000              
++STT    DATA               
++JSUB   FARSUB             
+LDL     =X'F1B2C3'         
+FARSUB  +STA    FARVAR             
+RSUB                      
+FARVAR  RESW    1                  
+END     0000               
