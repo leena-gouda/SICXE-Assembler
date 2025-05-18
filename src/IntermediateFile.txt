@@ -3,10 +3,10 @@ PROGA   START   0000
 LDB     #RESULT            
 BASE    RESULT             
 +ADD    WOD                
-+LDT    #512               
+LDT    #512               
 TIO                        
 MULR    A,X                
-+J      @RETADRR           
+CSUB    X,BUFFER,V           
 LTORG                      
 WOD     WORD    5                  
 GAMMA   BYTE    X'02'              
@@ -16,7 +16,7 @@ RESULT  RESW    1
 RETADRR RESB    4096                   
 LENGTH  BYTE    X'FF'              
 +LDS    #1000              
-+STT    DATA               
+STT    DATA               
 +JSUB   FARSUB             
 LDL     =X'F1B2C3'         
 FARSUB  +STA    FARVAR             

@@ -3,26 +3,26 @@ PROGA   START   0000
 0004	LDB     #RESULT            
 		BASE    RESULT             
 0007	+ADD    WOD                
-000B	+LDT    #512               
-000F	TIO                        
-0010	MULR    A,X                
-0012	+J      @RETADRR           
+000B	LDT    #512               
+000E	TIO                        
+000F	MULR    A,X                
+0011	CSUB    X,BUFFER,V           
 		LTORG                      
-0016	=C'A'
-0017	WOD     WORD    5                  
-001A	GAMMA   BYTE    X'02'              
-001B	DATA    WORD    5                  
-001E	BUFFER  RESB    10                 
-0028	RESULT  RESW    1             
-002B	RETADRR RESB    4096                   
-102B	LENGTH  BYTE    X'FF'              
-102C	+LDS    #1000              
-1030	+STT    DATA               
-1034	+JSUB   FARSUB             
-1038	LDL     =X'F1B2C3'         
-103B	FARSUB  +STA    FARVAR             
+0015	=C'A'
+0016	WOD     WORD    5                  
+0019	GAMMA   BYTE    X'02'              
+001A	DATA    WORD    5                  
+001D	BUFFER  RESB    10                 
+0027	RESULT  RESW    1             
+002A	RETADRR RESB    4096                   
+102A	LENGTH  BYTE    X'FF'              
+102B	+LDS    #1000              
+102F	STT    DATA               
+1032	+JSUB   FARSUB             
+1036	LDL     =X'F1B2C3'         
+1039	FARSUB  +STA    FARVAR             
 		LTORG
-103F	=X'F1B2C3'
-1042	RSUB                      
-1045	FARVAR  RESW    1                  
-1048	END
+103D	=X'F1B2C3'
+1040	RSUB                      
+1043	FARVAR  RESW    1                  
+1046	END     0000               

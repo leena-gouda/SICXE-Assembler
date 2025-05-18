@@ -19,10 +19,10 @@ public class Pass2 {
 
 
     public void openFiles(){
-        //File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass1_out.txt");
-        //File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\pass2_out.txt");
-        File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
-        File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
+        File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass1_out.txt");
+        File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass2_out.txt");
+        //File pass1_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass1_out.txt");
+        //File pass2_out = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\pass2_out.txt");
 
         handleCode(pass1_out, pass2_out);
     }
@@ -85,9 +85,8 @@ public class Pass2 {
                 i.opcode = Instruction.findOpcode(i.Mnemonic);
 
                 // add each instr obj to code
-                if(!i.Mnemonic.equals("BASE") && !i.Mnemonic.equals("LTORG")){
-                    Pass2.code.add(i);
-                }
+                Pass2.code.add(i);
+
 
 
             }
@@ -175,9 +174,36 @@ public class Pass2 {
                 case 2 -> handleFormat2(i);
                 case 3 -> handleFormat3(i);
                 case 4 -> handleFormat4(i);
+                case 5 -> handleNewFormat(i);
                 default -> "Invalid Instruction: format not found";
             };
         }
+    }
+
+    private String handleNewFormat(Instruction i){
+        String opcode = handleOpCode(i);
+        String [] parts = i.operand.split(",");
+        //decimal
+        String reg = registerCode(parts[0]);
+        String regBin = String.format("%4s", Integer.toBinaryString(Integer.parseInt(reg))).replace(' ', '0');
+        String flag = parts[2];
+        // decimal
+        String conditionFlag = "";
+        switch (flag) {
+            case "Z" : conditionFlag = "00";
+            break;
+            case "N" : conditionFlag = "01";
+            break;
+            case "C" : conditionFlag = "02";
+            break;
+            case "V" : conditionFlag = "03";
+        }
+        String flagBin = String.format("%2s", Integer.toBinaryString(Integer.parseInt(conditionFlag))).replace(' ', '0');
+        String label = parts[1];
+        //hex
+        String address = getTA(label);
+        return (binaryToHex(opcode + regBin + flagBin) + to5DigitHex(Integer.parseInt(address, 16)));
+
     }
 
     private String handleLiteralOperand(Instruction i) {
@@ -443,8 +469,8 @@ public class Pass2 {
     }
 
     private void HTMERecords(File pass2out) {
-        File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
-        //File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\HTME.txt");
+        //File htmeFile= new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\HTME.txt");
+        File htmeFile= new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\HTME.txt");
         Scanner pass2Reader = null;
         PrintWriter htmeWriter = null;
         try {
@@ -456,13 +482,8 @@ public class Pass2 {
             htmeWriter.print(T);
             String M = "";
             for (Instruction i : code) {
-                if (i.operand != null && i.operand.startsWith("=")) {
-                    System.out.println("Skipping instruction with literal operand: " + i);
-                } else if (i.operand == null) {
-                    System.err.println("Skipping instruction with null operand: " + i);
-                }
                 String currentAddress = i.loc;
-                if(i.Mnemonic.startsWith("+") && !i.operand.startsWith("#")){
+                if((i.Mnemonic.startsWith("+") && !i.operand.startsWith("#") || i.format == 5)){
                     M = MRecord(currentAddress);
                     htmeWriter.println(M);
                 }
@@ -582,7 +603,7 @@ public class Pass2 {
 
         for (Instruction i  : code) {
 
-            if(i.Mnemonic.equals("END"))
+            if(i.Mnemonic.equals("END") || i.Mnemonic.equals("BASE") || i.Mnemonic.equals("LTORG"))
                 continue;
 
             int j = Pass2.code.indexOf(i);
@@ -602,7 +623,9 @@ public class Pass2 {
                     length = 0; //same for length
                 }
                 // Skip RESB or RESW but go to next address
-                currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
+                if(!code.get(j + 1).Mnemonic.equals("BASE") && !code.get(j + 1).Mnemonic.equals("LTORG")) {
+                    currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
+                }
                 continue;
             }
 
@@ -616,15 +639,18 @@ public class Pass2 {
                 }
                 // Start new record with current objCode
                 objcodes.add(i.objCode); //put current obj code in list
-                length = byteSize;    // length contains the number of bytes
-                currentAddress = Integer.parseInt(code.get(j + 1).loc, 16); //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
-                System.out.println(currentAddress + "inside");
+                length = byteSize;
+                if(!code.get(j + 1).Mnemonic.equals("BASE") && !code.get(j + 1).Mnemonic.equals("LTORG")) {
+                    currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
+                }// length contains the number of bytes
+                //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
             }
             else {//if theres no special cases
                 objcodes.add(i.objCode);
                 length += byteSize;
-                currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
-                System.out.println(currentAddress + "out");
+                if(!code.get(j + 1).Mnemonic.equals("BASE") && !code.get(j + 1).Mnemonic.equals("LTORG")) {
+                    currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
+                }
 
             }
         }

@@ -3,10 +3,10 @@ import java.io.*;
 import java.util.*;
 public class Main {
     public static void main(String[] args) {
-        //File code1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\code1.txt");
-        //File intFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\SICXE\\src\\IntermediateFile.txt");
-        File code1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\code1.txt");
-        File intFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\IntermediateFile.txt");
+        File code1 = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\code1.txt");
+        File intFile = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\IntermediateFile.txt");
+        //File code1 = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\code1.txt");
+        //File intFile = new File("C:\\Users\\OPT\\OneDrive\\Desktop\\SICXE Project\\SICXE Assembler\\src\\IntermediateFile.txt");
 
         addIns();
 
@@ -116,5 +116,11 @@ public class Main {
         Instruction.instructions.add(new Instruction("TIX", 3, "2C"));
         Instruction.instructions.add(new Instruction("TIXR", 2, "B8"));
         Instruction.instructions.add(new Instruction("WD", 3, "DC"));
+        Instruction.instructions.add(new Instruction("CADD", 5, "BC"));
+        Instruction.instructions.add(new Instruction("CSUB", 5, "8C"));
+        Instruction.instructions.add(new Instruction("CLOAD", 5 , "E4"));
+        Instruction.instructions.add(new Instruction("CSTORE", 5, "FC"));
+        Instruction.instructions.add(new Instruction("CJUMP", 5, "CC"));
+
     }
 }
