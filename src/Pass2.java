@@ -17,7 +17,6 @@ public class Pass2 {
     private Map<String,String> literalAddresses;
     private Map<String,Integer> literalSizes;
 
-
     public void openFiles(){
         File pass1_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass1_out.txt");
         File pass2_out = new File("C:\\Users\\rsl_f\\OneDrive\\Desktop\\term 6\\systems programming\\project\\SICXE\\src\\pass2_out.txt");
@@ -180,32 +179,6 @@ public class Pass2 {
         }
     }
 
-    private String handleNewFormat(Instruction i){
-        String opcode = handleOpCode(i);
-        String [] parts = i.operand.split(",");
-        //decimal
-        String reg = registerCode(parts[0]);
-        String regBin = String.format("%4s", Integer.toBinaryString(Integer.parseInt(reg))).replace(' ', '0');
-        String flag = parts[2];
-        // decimal
-        String conditionFlag = "";
-        switch (flag) {
-            case "Z" : conditionFlag = "00";
-            break;
-            case "N" : conditionFlag = "01";
-            break;
-            case "C" : conditionFlag = "02";
-            break;
-            case "V" : conditionFlag = "03";
-        }
-        String flagBin = String.format("%2s", Integer.toBinaryString(Integer.parseInt(conditionFlag))).replace(' ', '0');
-        String label = parts[1];
-        //hex
-        String address = getTA(label);
-        return (binaryToHex(opcode + regBin + flagBin) + to5DigitHex(Integer.parseInt(address, 16)));
-
-    }
-
     private String handleLiteralOperand(Instruction i) {
         String literal = i.operand.substring(1); // Remove '='
 
@@ -332,6 +305,32 @@ public class Pass2 {
         String disp = addMode.substring(1);
         objCode = binaryToHex(opcode + NIX + b + p + e) + disp;
         return objCode;
+    }
+
+    private String handleNewFormat(Instruction i){
+        String opcode = handleOpCode(i);
+        String [] parts = i.operand.split(",");
+        //decimal
+        String reg = registerCode(parts[0]);
+        String regBin = String.format("%4s", Integer.toBinaryString(Integer.parseInt(reg))).replace(' ', '0');
+        String flag = parts[2];
+        // decimal
+        String conditionFlag = "";
+        switch (flag) {
+            case "Z" : conditionFlag = "00";
+                break;
+            case "N" : conditionFlag = "01";
+                break;
+            case "C" : conditionFlag = "02";
+                break;
+            case "V" : conditionFlag = "03";
+        }
+        String flagBin = String.format("%2s", Integer.toBinaryString(Integer.parseInt(conditionFlag))).replace(' ', '0');
+        String label = parts[1];
+        //hex
+        String address = getTA(label);
+        return (binaryToHex(opcode + regBin + flagBin) + to5DigitHex(Integer.parseInt(address, 16)));
+
     }
 
     private String hexToBinary(String hex) {
@@ -483,7 +482,9 @@ public class Pass2 {
             String M = "";
             for (Instruction i : code) {
                 String currentAddress = i.loc;
-                if((i.Mnemonic.startsWith("+") && !i.operand.startsWith("#") || i.format == 5)){
+                if((i.Mnemonic.startsWith("+")  || i.format == 5) && !(i.operand.startsWith("#")
+                        && i.operand.substring(1).matches("\\d+"))){
+
                     M = MRecord(currentAddress);
                     htmeWriter.println(M);
                 }
@@ -622,7 +623,6 @@ public class Pass2 {
                     objcodes.clear(); //remove the objcodes from list to not repeat them when we start a new t
                     length = 0; //same for length
                 }
-                // Skip RESB or RESW but go to next address
                 if(!code.get(j + 1).Mnemonic.equals("BASE") && !code.get(j + 1).Mnemonic.equals("LTORG")) {
                     currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
                 }
@@ -642,10 +642,9 @@ public class Pass2 {
                 length = byteSize;
                 if(!code.get(j + 1).Mnemonic.equals("BASE") && !code.get(j + 1).Mnemonic.equals("LTORG")) {
                     currentAddress = Integer.parseInt(code.get(j + 1).loc, 16);
-                }// length contains the number of bytes
-                //add the number of bytes on current address to move forward with addresses based on size of instruction(format)
+                }
             }
-            else {//if theres no special cases
+            else {
                 objcodes.add(i.objCode);
                 length += byteSize;
                 if(!code.get(j + 1).Mnemonic.equals("BASE") && !code.get(j + 1).Mnemonic.equals("LTORG")) {

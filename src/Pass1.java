@@ -48,20 +48,21 @@ public class Pass1 {
                     pass1Write.println("\t\t" + line);
                     continue;
                 }
-                if (line.contains("=")) {
+                else if (line.contains("=")) {
                     String literal = extractLiteralFromLine(line);
                     if(literal != null && !pendingLiterals.contains(literal)){
                         pendingLiterals.add(literal);
                     }
                 }
-//                else if (line.contains("END")) {
-//                    // Process ALL remaining literals before END
-//                    if (!pendingLiterals.isEmpty()) {
-//                       processPendingLiterals(pass1Write, pendingLiterals);
-//                    }
-//                    pass1Write.printf("%04X\tEND\n", locCount);
-//                    continue;
-//                }
+                else if (line.matches(".*\\bEND\\b.*")) {
+                    // Process ALL remaining literals before END
+                    if (!pendingLiterals.isEmpty()) {
+                       processPendingLiterals(pass1Write, pendingLiterals);
+                    }
+                    pass1Write.write(String.format("%04X\t", locCount));
+                    pass1Write.println("\t\t" + line);
+                    continue;
+                }
 
                 else if(line.contains("LTORG")){
                     pass1Write.println("\t\t" + line);
@@ -69,8 +70,6 @@ public class Pass1 {
                     processPendingLiterals(pass1Write,pendingLiterals);
                     continue;
                 }
-
-
 
 
                 //write locCount (of previous inst) and rewrite current instruction
@@ -140,7 +139,7 @@ public class Pass1 {
                 else if (line.contains("BYTE")){
                     switch (instruction.operand.charAt(0)){
                         // if hex value, remove X'' and divide by 2. ex: X'F12356' --> 9 - 3 = 6 --> 6 / 2 = 3 SP locCount += 3 (3 bytes)
-                        case 'X' : locCount += (instruction.operand.length() - 3) / 2;
+                        case 'X' : locCount += Math.ceil(((instruction.operand.length() - 3) / 2.0));
                         break;
                         // if char, remove C''. ex: C'EOF' - 3 = 3 (3 bytes; 1 byte for each char)
                         case 'C' : locCount += instruction.operand.length() - 3;
@@ -200,9 +199,6 @@ public class Pass1 {
     }
 
     private void processPendingLiterals(PrintWriter pass1Write, List<String> pendingLiterals) {
-        // Sort literals by size (3-byte first for better alignment)
-        //pendingLiterals.sort((a,b) -> Integer.compare(calculateLiteralSize(b), calculateLiteralSize(a)));
-
         for (String literal : pendingLiterals) {
             if (!literalAddresses.containsKey(literal)) {//if the literal not found
                 int size = calculateLiteralSize(literal);//get size

@@ -1,29 +1,19 @@
 loc		label		instr		operand			obj code
-        PROGA           START   0000                    
-0000                    +LDA    =C'A'           03100015
-0004                    LDB     #RESULT         692020  
-                        BASE    RESULT          
-0007                    +ADD    WOD             1B100016
-000B                    LDT     #512            750200  
-000E                    TIO                     F8      
-000F                    MULR    A,X             9801    
-0011                    CSUB    X,BUFFER,V      8C70001D
-                        LTORG                           
-0015                    =C'A'                   41      
-0016    WOD             WORD    5               000005  
-0019    GAMMA           BYTE    X'02'           02      
-001A    DATA            WORD    5               000005  
-001D    BUFFER          RESB    10                      
-0027    RESULT          RESW    1                       
-002A    RETADRR         RESB    4096                    
-102A    LENGTH          BYTE    X'FF'           FF      
-102B                    +LDS    #1000           6D1003E8
-102F                    STT     DATA            874F3   
-1032                    +JSUB   FARSUB          4B101039
-1036                    LDL     =X'F1B2C3'      0B2004  
-1039    FARSUB          +STA    FARVAR          0F101043
-                        LTORG                           
-103D                    =X'F1B2C3'                F1B2C3  
-1040                    RSUB                    4F0000  
-1043    FARVAR          RESW    1                       
-1046                    END     0000                    
+        COPY            START   0                       
+0000    FIRST           +STL    @RETADR         16101024
+0004                    LDB     #LENGTH         69200B  
+                        BASE    LENGTH          
+0007    CLOOP           JSUB    RDREC           4B200B  
+000A                    CADD    X,LENGTH,N      BC500012
+000E                    +LDA    #4096           01101000
+0012    LENGTH          WORD    5               000005  
+0015    RDREC           RESB    4096                    
+1015    BUFFER          RESW    5                       
+1024    RETADR          BYTE    C'HELLO'        48454C4C4F
+1029                    TIO                     F8      
+102A                    TIXR    S               B840    
+102C    VAR1            BYTE    X'0123456'      0123456 
+1030                    CLOAD   S,BUFFER,Z      E5001015
+1034                    FIX                     C4      
+1035                    LDA     #3              010003  
+1038                    END     FIRST                   

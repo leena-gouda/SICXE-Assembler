@@ -1,26 +1,18 @@
-1           PROGA   START   0000                ; PROGRAM STARTING ADDRESS
-3                   +LDA    =C'A'              ; EXTENDED: LOAD CHARACTER 'A'
-4                   LDB     #RESULT            ; LOAD ADDRESS OF RESULT
-5                   BASE    RESULT             ; ESTABLISH BASE REGISTER
-6                   +ADD    WOD                ; EXTENDED: ADD WORD VALUE
-7                    LDT    #512               ; EXTENDED: LOAD LARGE INDEX VALUE
-8                   TIO                        ; TEST I/O DEVICE
-9                   MULR    A,X                ; MULTIPLY REGISTERS
-10                  CSUB    X,BUFFER,V           ; EXTENDED JUMP TO RETURN ADDRESS
-12                  LTORG                      ; LITERAL POOL
-14          WOD     WORD    5                  ; WORD VALUE
-15          GAMMA   BYTE    X'02'              ; BYTE VALUE
-16          DATA    WORD    5                  ; DATA WORD
-17          BUFFER  RESB    10                 ; 10-BYTE BUFFER
-18          RESULT  RESW    1             ; LARGE RETURN AREA
-19          RETADRR RESB    4096                   ; RESULT STORAGE
-20          LENGTH  BYTE    X'FF'              ; LENGTH BYTE
-22                  +LDS    #1000              ; EXTENDED: LOAD STACK POINTER
-23                   STT    DATA               ; EXTENDED: STORE T REGISTER
-24                  +JSUB   FARSUB             ; EXTENDED: CALL FAR SUBROUTINE
-25                  LDL     =X'F1B2C3'         ;literal
-26          FARSUB  +STA    FARVAR             ; EXTENDED SUBROUTINE: STORE A
-                    LTORG
-27                  RSUB                      ; EXTENDED RETURN
-29          FARVAR  RESW    1                  ; VARIABLE IN FAR MEMORY
-31                  END     0000               ; END OF PROGRAM
+1 COPY START 0 ;Program starts at address 0
+2 FIRST +STL @RETADR ;Store the return address (indirect) into RETADR
+3 LDB #LENGTH ;Load immediate value of LENGTH into B register
+4 BASE LENGTH ;Set base register for addressing
+5 CLOOP JSUB RDREC ;Call subroutine RDREC
+6 CADD X,LENGTH,N ;Custom instruction or invalid opcode
+7 +LDA #4096 ;Load immediate value 4096 into A register
+8 LENGTH WORD 5 ;Define constant LENGTH = 5
+9 RDREC RESB 4096 ;Reserve 4096 bytes for record buffer
+10 BUFFER RESW 5 ;Reserve 5 words (15 bytes) for buffer
+11 RETADR BYTE C'HELLO' ;Define a constant byte with ASCII string "HELLO"
+12 TIO ;Possibly I/O operation (not standard SIC/XE)
+13 TIXR S ;Increment index register X, compare with S
+14 VAR1 BYTE X'0123456' ;Define a byte constant in hex
+15 CLOAD S,BUFFER,Z ;Possibly pseudo instruction or custom syntax
+16 FIX ;Undefined operation (label or placeholder)
+17 LDA #3 ;Load immediate value 3 into A register
+18 END FIRST ;End program, executionÂ beginsÂ atÂ FIRST

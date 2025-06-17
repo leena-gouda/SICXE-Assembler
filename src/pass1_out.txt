@@ -1,28 +1,18 @@
-PROGA   START   0000                
-0000	+LDA    =C'A'              
-0004	LDB     #RESULT            
-		BASE    RESULT             
-0007	+ADD    WOD                
-000B	LDT    #512               
-000E	TIO                        
-000F	MULR    A,X                
-0011	CSUB    X,BUFFER,V           
-		LTORG                      
-0015	=C'A'
-0016	WOD     WORD    5                  
-0019	GAMMA   BYTE    X'02'              
-001A	DATA    WORD    5                  
-001D	BUFFER  RESB    10                 
-0027	RESULT  RESW    1             
-002A	RETADRR RESB    4096                   
-102A	LENGTH  BYTE    X'FF'              
-102B	+LDS    #1000              
-102F	STT    DATA               
-1032	+JSUB   FARSUB             
-1036	LDL     =X'F1B2C3'         
-1039	FARSUB  +STA    FARVAR             
-		LTORG
-103D	=X'F1B2C3'
-1040	RSUB                      
-1043	FARVAR  RESW    1                  
-1046	END     0000               
+COPY START 0 
+0000	FIRST +STL @RETADR 
+0004	LDB #LENGTH 
+		BASE LENGTH 
+0007	CLOOP JSUB RDREC 
+000A	CADD X,LENGTH,N 
+000E	+LDA #4096 
+0012	LENGTH WORD 5 
+0015	RDREC RESB 4096 
+1015	BUFFER RESW 5 
+1024	RETADR BYTE C'HELLO' 
+1029	TIO 
+102A	TIXR S 
+102C	VAR1 BYTE X'0123456' 
+1030	CLOAD S,BUFFER,Z 
+1034	FIX 
+1035	LDA #3 
+1038			END FIRST 
